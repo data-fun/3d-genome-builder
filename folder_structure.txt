@@ -1,0 +1,38 @@
+
+#Folder structure
+
+work_dir
+	|species_name
+		species_name_genome.fasta
+		
+		|raw_data
+			|sample_1
+			...
+			|sample_Z
+			
+		|HiC-Pro_config_files
+			|index
+			species_name_chrom_sizes.txt
+			species_name_restriction_enzyme_names.txt
+			config-hicpro.txt
+		|output
+			|boxtie_results
+			|logs
+			|hic_results
+				|data
+					|sample_X
+						sample_X.validPairs
+		|merged_samples
+			sample_X.validPairs
+			sample_Y.validPairs
+			sample_Z.validPairs
+		
+		|dense_matrix
+			merged_samples_50000_dense.matrix
+		
+		|pastis
+			|data
+				counts_matrix_50K.npy
+			|files
+				species_name_structure
+			config.ini
