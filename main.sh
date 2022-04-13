@@ -6,7 +6,20 @@ HiC fastq SRA_IDs = []
 restriction_enzyme_name = [] #one or more
 """
 
-#CONDA ENV 3D_models
+
+
+conda activate 3D-genome-model
+
+species_name="n_crassa"
+mkdir -p "${species_name}/raw_data"
+
+for name in $(cat sra.txt)
+do
+    echo "Downloading ${name}"
+    mkdir -p "${species_name}/raw_data/${name}"
+    fasterq-dump "${name}" --progress --outdir "${species_name}/raw_data/${name}"
+done
+
 
 #loop on nb of SRA_ID ? Put (compressed ?) files into separated folders (./species_name/raw_data/sample_X)
 fastq-dump SRR16761089 --split-files
