@@ -1,0 +1,10 @@
+# snakemake directory
+.snakemake
+
+# directories to build genome
+3d_*
+
+# singularity images
+images/*
+!images/.gitkeep
+

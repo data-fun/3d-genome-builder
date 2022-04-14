@@ -1,4 +1,4 @@
-name: 3D-genome-model
+name: 3d-genome-builder
 # channels priority
 # see https://bioconda.github.io/
 # conda-forge has highest priority
@@ -8,6 +8,13 @@ channels:
   - conda-forge
 dependencies:
   - python>=3.8
+  - snakemake-minimal
+  - singularity>=3.8.7
+  # fasterq-dump
   - sra-tools
+  # pigz: parralel implementation of gzip
+  - pigz
+  # Python library to read fasta files
+  - biopython
 
   
