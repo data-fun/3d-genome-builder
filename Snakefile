@@ -8,7 +8,8 @@ rule all:
                workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1]),
         expand("{workdir}/HiC-Pro/chromosome_sizes.txt", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/restriction_sites.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/bowtie2_index/index.1.bt2", workdir=WORKDIR)
+        expand("{workdir}/HiC-Pro/bowtie2_index/index.1.bt2", workdir=WORKDIR),
+        expand("{workdir}/HiC-Pro/config.txt", workdir=WORKDIR)
 
 
 # fasterq-dump documentation:
@@ -101,3 +102,25 @@ rule build_genome_index_HiC_Pro:
         "images/hicpro.sif"
     shell:
         "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/index 2>&1 | tee {log}"
+
+
+rule create_HiC_Pro_config:
+    input:
+        template="templates/HiC-Pro_config.template",
+        chromosome_sizes="{WORKDIR}/HiC-Pro/chromosome_sizes.txt",
+        genome_fragment="{WORKDIR}/HiC-Pro/restriction_sites.txt"
+    output:
+        "{WORKDIR}/HiC-Pro/config.txt"
+    params:
+        genome_index_path="{WORKDIR}/HiC-Pro/bowtie2_index", 
+    script:
+        "scripts/create_HiC_Pro_config.py"
+
+
+rule run_HiC_Pro:
+    input:
+        config="3d_n_crassa/HiC-Pro/config.txt"
+    container:
+        "images/hicpro.sif"
+    shell:
+        "HiC-Pro -i ./3d_n_crassa/raw_data -o ./3d_n_crassa/output -c {input.config}"

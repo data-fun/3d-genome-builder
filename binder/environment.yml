@@ -17,5 +17,7 @@ dependencies:
   - biopython
   # Build DAG with Snakemake
   - graphviz
+  # Create HiC-Pro config file with template
+  - jinja2
 
   

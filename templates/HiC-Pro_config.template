@@ -8,7 +8,7 @@ TMP_DIR = tmp
 LOGS_DIR = logs
 BOWTIE2_OUTPUT_DIR = bowtie_results
 MAPC_OUTPUT = hic_results
-RAW_DIR = rawdata
+RAW_DIR = raw_data
 
 #######################################################################
 ## SYSTEM AND SCHEDULER - Start Editing Here !!
@@ -36,7 +36,8 @@ PAIR2_EXT = _R2
 
 MIN_MAPQ = 10
 
-BOWTIE2_IDX_PATH = /home/thibault/Neurospora/Hi-C-Pro_config_files/index
+#BOWTIE2_IDX_PATH = /home/thibault/Neurospora/Hi-C-Pro_config_files/index
+BOWTIE2_IDX_PATH = {{ genome_index_path }}
 BOWTIE2_GLOBAL_OPTIONS = --very-sensitive -L 30 --score-min L,-0.6,-0.2 --end-to-end --reorder
 BOWTIE2_LOCAL_OPTIONS =  --very-sensitive -L 20 --score-min L,-0.6,-0.2 --end-to-end --reorder
 
@@ -44,8 +45,10 @@ BOWTIE2_LOCAL_OPTIONS =  --very-sensitive -L 20 --score-min L,-0.6,-0.2 --end-to
 ## Annotation files
 #######################################################################
 
-REFERENCE_GENOME = neurospora
-GENOME_SIZE = /home/thibault/Neurospora/Hi-C-Pro_config_files/Neurospora_chrom_sizes.txt
+#REFERENCE_GENOME = neurospora
+REFERENCE_GENOME = genome
+#GENOME_SIZE = /home/thibault/Neurospora/Hi-C-Pro_config_files/Neurospora_chrom_sizes.txt
+GENOME_SIZE = {{ chromosome_sizes }}
 
 #######################################################################
 ## Allele specific analysis
@@ -64,7 +67,8 @@ REPORT_CAPTURE_REPORTER = 1
 ## Digestion Hi-C
 #######################################################################
 
-GENOME_FRAGMENT = /home/thibault/Neurospora/Hi-C-Pro_config_files/Neurospora_DpnII-MseI
+#GENOME_FRAGMENT = /home/thibault/Neurospora/Hi-C-Pro_config_files/Neurospora_DpnII-MseI
+GENOME_FRAGMENT = {{ genome_fragment }}
 LIGATION_SITE =
 MIN_FRAG_SIZE =
 MAX_FRAG_SIZE =

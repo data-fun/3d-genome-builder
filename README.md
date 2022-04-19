@@ -91,7 +91,7 @@ snakemake --cores 4 --configfile config.yml --use-singularity
 or for debugging purpose:
 
 ```bash
-snakemake --cores 4 --configfile config.yml -p --verbose --use-singularity
+snakemake --cores 4 --configfile config.yml --use-singularity -p --verbose
 ```
 
 ## Build DAG graph
