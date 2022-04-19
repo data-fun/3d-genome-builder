@@ -9,7 +9,6 @@ channels:
 dependencies:
   - python>=3.8
   - snakemake-minimal
-  - singularity>=3.8.7
   # fasterq-dump
   - sra-tools
   # pigz: parralel implementation of gzip
