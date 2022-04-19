@@ -85,11 +85,21 @@ bash prepare_n_crassa_genome.sh
 Run 3D model construction:
 
 ```bash
-snakemake --cores 4 --configfile config.yml
+snakemake --cores 4 --configfile config.yml --use-singularity
 ```
 
 or for debugging purpose:
 
 ```bash
-snakemake --cores 4 --configfile config.yml -p --verbose --debug-dag
+snakemake --cores 4 --configfile config.yml -p --verbose --use-singularity
+```
+
+## Build DAG graph
+
+```bash
+snakemake --configfile config.yml --dag  | dot -Tpdf > dag.pdf
+```
+
+```bash
+snakemake --configfile config.yml --rulegraph  | dot -Tpdf > rules.pdf
 ```

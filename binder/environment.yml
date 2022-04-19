@@ -15,5 +15,7 @@ dependencies:
   - pigz
   # Python library to read fasta files
   - biopython
+  # Build DAG with Snakemake
+  - graphviz
 
   
