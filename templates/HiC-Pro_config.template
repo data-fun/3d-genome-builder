@@ -46,7 +46,7 @@ BOWTIE2_LOCAL_OPTIONS =  --very-sensitive -L 20 --score-min L,-0.6,-0.2 --end-to
 #######################################################################
 
 #REFERENCE_GENOME = neurospora
-REFERENCE_GENOME = genome
+REFERENCE_GENOME = reference_genome
 #GENOME_SIZE = /home/thibault/Neurospora/Hi-C-Pro_config_files/Neurospora_chrom_sizes.txt
 GENOME_SIZE = {{ chromosome_sizes }}
 

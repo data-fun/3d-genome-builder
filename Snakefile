@@ -8,7 +8,7 @@ rule all:
                workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1]),
         expand("{workdir}/HiC-Pro/chromosome_sizes.txt", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/restriction_sites.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/bowtie2_index/index.1.bt2", workdir=WORKDIR),
+        expand("{workdir}/HiC-Pro/bowtie2_index/reference_genome.1.bt2", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/config.txt", workdir=WORKDIR)
 
 
@@ -95,13 +95,13 @@ rule build_genome_index_HiC_Pro:
     input:
         "{WORKDIR}/genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/bowtie2_index/index.1.bt2"
+        "{WORKDIR}/HiC-Pro/bowtie2_index/reference_genome.1.bt2"
     log:
         "{WORKDIR}/logs/build_genome_index.log"
     container:
         "images/hicpro.sif"
     shell:
-        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/index 2>&1 | tee {log}"
+        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/reference_genome 2>&1 | tee {log}"
 
 
 rule create_HiC_Pro_config:
