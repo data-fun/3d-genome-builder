@@ -1,48 +1,67 @@
-print(config)
+#print(config)
 
 WORKDIR = f"3d_{config['organism_name_short'].lower()}"
 
 rule all:
     input:
-        #expand("{workdir}/raw_data/{sra_id}/{sra_id}_{paired}.fastq.gz", 
-        #       workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1])
+        expand("{workdir}/raw_data/{sra_id}/{sra_id}_R{paired}.fastq.gz",
+               workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1]),
         expand("{workdir}/HiC-Pro/chromosome_sizes.txt", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/restriction_sites.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/bowtie2_index/genome.1.bt2", workdir=WORKDIR)
+        expand("{workdir}/HiC-Pro/bowtie2_index/index.1.bt2", workdir=WORKDIR)
 
 
 # fasterq-dump documentation:
 # https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump
-rule download_fastq:
+rule download_fastq_files:
     output:
-        "{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq"
+        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq",
+        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_2.fastq"
     params:
-        "--progress"
+        outdir="{WORKDIR}/raw_data/{sra_id}/",
+        progress="--progress",
+        loglevel="info"
     threads:
-        4
+        2
     log:
         "{WORKDIR}/logs/fasterq-dump_{sra_id}.log"
     message:
         "Downloading {wildcards.sra_id} files"
     shell: 
-        "mkdir -p {WORKDIR}/raw_data/{wildcards.sra_id} && "
-        "fasterq-dump {wildcards.sra_id} --threads {threads} {params} --outdir {WORKDIR}/raw_data/{wildcards.sra_id}/ "
+        "fasterq-dump {wildcards.sra_id} --threads {threads} --log-level {params.loglevel} "
+        "{params.progress} --outdir {params.outdir} 2>&1 >{log}"
 
 
-rule compress_fastq:
+rule rename_paired_fastq_files:
     input:
-        "{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq"
+        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq",
+        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_2.fastq"
     output:
-        "{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq.gz"
+        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq",
+        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq"
+    message:
+        "Renamming {wildcards.sra_id} files"
+    shell: 
+        "mv {input.R1} {output.R1} &&"
+        "mv {input.R2} {output.R2} "
+
+
+rule compress_fastq_files:
+    input:
+        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq",
+        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq",
+    output:
+        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq.gz",
+        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq.gz"
     threads:
         4
     log:
-        "{WORKDIR}/logs/gzip_{sra_id}.log"
+        "{WORKDIR}/logs/pigz_{sra_id}.log"
     message:
         "Compressing {input}"
     shell: 
         # pigz is the parallel implementation of gzip
-        "pigz -p {threads} {WORKDIR}/raw_data/{wildcards.sra_id}/*"
+        "pigz -p {threads} {input}"
 
 
 rule calculate_chromosome_sizes:
@@ -57,13 +76,13 @@ rule calculate_chromosome_sizes:
 
 
     
-rule hicpro:
+rule digest_genome_HiC_Pro:
     input:
         "{WORKDIR}/genome.fasta"
     output:
         "{WORKDIR}/HiC-Pro/restriction_sites.txt"
     container:
-        "images/hicpro.img"
+        "images/hicpro.sif"
     shell:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py "
         "-r {config[hicpro_restriction_sites]} "
@@ -71,12 +90,14 @@ rule hicpro:
         "{input}"
 
 
-rule build_genome_index:
+rule build_genome_index_HiC_Pro:
     input:
         "{WORKDIR}/genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/bowtie2_index/genome.1.bt2"
+        "{WORKDIR}/HiC-Pro/bowtie2_index/index.1.bt2"
+    log:
+        "{WORKDIR}/logs/build_genome_index.log"
     container:
-        "images/hicpro.img"
+        "images/hicpro.sif"
     shell:
-        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/genome"
+        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/index 2>&1 | tee {log}"
