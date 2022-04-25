@@ -4,11 +4,11 @@ WORKDIR = f"3d_{config['organism_name_short'].lower()}"
 
 rule all:
     input:
-        expand("{workdir}/raw_data/{sra_id}/{sra_id}_R{paired}.fastq.gz",
+        expand("{workdir}/fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz",
                workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1]),
         expand("{workdir}/HiC-Pro/chromosome_sizes.txt", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/restriction_sites.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/bowtie2_index/reference_genome.1.bt2", workdir=WORKDIR),
+        expand("{workdir}/HiC-Pro/bowtie2_index/genome.1.bt2", workdir=WORKDIR),
         expand("{workdir}/HiC-Pro/config.txt", workdir=WORKDIR)
 
 
@@ -16,10 +16,10 @@ rule all:
 # https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump
 rule download_fastq_files:
     output:
-        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq",
-        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_2.fastq"
+        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_1.fastq",
+        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_2.fastq"
     params:
-        outdir="{WORKDIR}/raw_data/{sra_id}/",
+        outdir="{WORKDIR}/fastq_files/{sra_id}/",
         progress="--progress",
         loglevel="info"
     threads:
@@ -35,11 +35,11 @@ rule download_fastq_files:
 
 rule rename_paired_fastq_files:
     input:
-        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_1.fastq",
-        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_2.fastq"
+        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_1.fastq",
+        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_2.fastq"
     output:
-        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq",
-        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq"
+        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq",
+        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq"
     message:
         "Renamming {wildcards.sra_id} files"
     shell: 
@@ -49,11 +49,11 @@ rule rename_paired_fastq_files:
 
 rule compress_fastq_files:
     input:
-        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq",
-        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq",
+        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq",
+        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq",
     output:
-        R1="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R1.fastq.gz",
-        R2="{WORKDIR}/raw_data/{sra_id}/{sra_id}_R2.fastq.gz"
+        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq.gz",
+        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq.gz"
     threads:
         4
     log:
@@ -95,13 +95,13 @@ rule build_genome_index_HiC_Pro:
     input:
         "{WORKDIR}/genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/bowtie2_index/reference_genome.1.bt2"
+        "{WORKDIR}/HiC-Pro/bowtie2_index/genome.1.bt2"
     log:
         "{WORKDIR}/logs/build_genome_index.log"
     container:
         "images/hicpro.sif"
     shell:
-        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/reference_genome 2>&1 | tee {log}"
+        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/genome 2>&1 | tee {log}"
 
 
 rule create_HiC_Pro_config:
