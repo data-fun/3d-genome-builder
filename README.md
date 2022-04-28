@@ -21,6 +21,12 @@ $ singularity --version
 singularity version 3.8.7
 ```
 
+### HiCPlotter
+
+```bash
+wget https://gitee.com/simonjyoung/HiCPlotter/raw/master/HiCPlotter.py -P scripts
+```
+
 ### Conda environment
 
 Install conda.
@@ -43,14 +49,11 @@ Load conda environment:
 conda activate 3d-genome-builder
 ```
 
-## Build HiC-Pro Singularity image
+## Download  HiC-Pro Singularity image
+
 
 ```bash
-git clone https://github.com/nservant/HiC-Pro
-cd HiC-Pro
-sudo singularity build ../images/hicpro.sif Singularity
-cd ..
-rm -rf HiC-Pro
+wget --ciphers=DEFAULT:@SECLEVEL=1 https://zerkalo.curie.fr/partage/HiC-Pro/singularity_images/hicpro_3.1.0_ubuntu.img -P images
 ```
 
 Verify HiC-Pro version with:
@@ -71,7 +74,7 @@ $ singularity exec images/hicpro.sif bowtie2 --version  2>/dev/null | head -n 1
 
 ## Add parameters
 
-Create and edit the configuration file (`config.yml`).
+Create and edit the configuration file `config.yml`
 
 
 ## Build model
@@ -85,21 +88,21 @@ bash prepare_n_crassa_genome.sh
 Run 3D model construction:
 
 ```bash
-snakemake --cores 4 --configfile config.yml --use-singularity
+snakemake --cores 4 --use-singularity
 ```
 
-or for debugging purpose:
+or with debugging options:
 
 ```bash
-snakemake --cores 4 --configfile config.yml --use-singularity -p --verbose
+snakemake --cores 4 --use-singularity -p --verbose
 ```
 
 ## Build DAG graph
 
 ```bash
-snakemake --configfile config.yml --dag  | dot -Tpdf > dag.pdf
+snakemake --dag  | dot -Tpdf > dag.pdf
 ```
 
 ```bash
-snakemake --configfile config.yml --rulegraph  | dot -Tpdf > rules.pdf
+snakemake --rulegraph  | dot -Tpdf > rules.pdf
 ```

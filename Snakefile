@@ -1,31 +1,31 @@
-#print(config)
-
+configfile: "config.yml"
 WORKDIR = f"3d_{config['organism_name_short'].lower()}"
+workdir: f"{WORKDIR}"
 
 rule all:
     input:
-        expand("{workdir}/fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz",
-               workdir=WORKDIR, sra_id=config['sra_ids'], paired=[1]),
-        expand("{workdir}/HiC-Pro/chromosome_sizes.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/restriction_sites.txt", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/bowtie2_index/genome.1.bt2", workdir=WORKDIR),
-        expand("{workdir}/HiC-Pro/config.txt", workdir=WORKDIR)
+        expand("fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz",
+            sra_id=config['sra_ids'], paired=[1,2]),
+        "HiC-Pro/config.txt",
+        expand("HiC-Pro/output/logs/{sra_id}/build_raw_maps.log",
+            sra_id=config['sra_ids'])
+
 
 
 # fasterq-dump documentation:
 # https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump
 rule download_fastq_files:
     output:
-        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_1.fastq",
-        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_2.fastq"
+        R1="fastq_files/{sra_id}/{sra_id}_1.fastq",
+        R2="fastq_files/{sra_id}/{sra_id}_2.fastq"
     params:
-        outdir="{WORKDIR}/fastq_files/{sra_id}/",
+        outdir="fastq_files/{sra_id}/",
         progress="--progress",
         loglevel="info"
     threads:
         2
     log:
-        "{WORKDIR}/logs/fasterq-dump_{sra_id}.log"
+        "logs/fasterq-dump_{sra_id}.log"
     message:
         "Downloading {wildcards.sra_id} files"
     shell: 
@@ -35,29 +35,24 @@ rule download_fastq_files:
 
 rule rename_paired_fastq_files:
     input:
-        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_1.fastq",
-        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_2.fastq"
+        "fastq_files/{sra_id}/{sra_id}_{paired}.fastq"
     output:
-        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq",
-        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq"
+        "fastq_files/{sra_id}/{sra_id}_R{paired}.fastq"
     message:
         "Renamming {wildcards.sra_id} files"
     shell: 
-        "mv {input.R1} {output.R1} &&"
-        "mv {input.R2} {output.R2} "
+        "mv {input} {output}"
 
 
 rule compress_fastq_files:
     input:
-        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq",
-        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq",
+        "fastq_files/{sra_id}/{sra_id}_R{paired}.fastq"
     output:
-        R1="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R1.fastq.gz",
-        R2="{WORKDIR}/fastq_files/{sra_id}/{sra_id}_R2.fastq.gz"
+        "fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz"
     threads:
         4
     log:
-        "{WORKDIR}/logs/pigz_{sra_id}.log"
+        "logs/pigz_{sra_id}_R{paired}.log"
     message:
         "Compressing {input}"
     shell: 
@@ -67,23 +62,22 @@ rule compress_fastq_files:
 
 rule calculate_chromosome_sizes:
     input:
-        "{WORKDIR}/genome.fasta"
+        "genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/chromosome_sizes.txt"
+        "HiC-Pro/chromosome_sizes.txt"
     message:
         "Calculating chromosome sizes"
     script:
         "scripts/calculate_chromosome_sizes.py"
 
 
-    
 rule digest_genome_HiC_Pro:
     input:
-        "{WORKDIR}/genome.fasta"
+        "genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/restriction_sites.txt"
+        "HiC-Pro/restriction_sites.txt"
     container:
-        "images/hicpro.sif"
+        "../images/hicpro_3.1.0_ubuntu.img"
     shell:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py "
         "-r {config[hicpro_restriction_sites]} "
@@ -93,34 +87,39 @@ rule digest_genome_HiC_Pro:
 
 rule build_genome_index_HiC_Pro:
     input:
-        "{WORKDIR}/genome.fasta"
+        "genome.fasta"
     output:
-        "{WORKDIR}/HiC-Pro/bowtie2_index/genome.1.bt2"
+        "HiC-Pro/bowtie2_index/genome.1.bt2"
     log:
-        "{WORKDIR}/logs/build_genome_index.log"
+        "logs/build_genome_index.log"
     container:
-        "images/hicpro.sif"
+        "../images/hicpro_3.1.0_ubuntu.img"
     shell:
-        "bowtie2-build {input} {WORKDIR}/HiC-Pro/bowtie2_index/genome 2>&1 | tee {log}"
+        "bowtie2-build {input} HiC-Pro/bowtie2_index/genome 2>&1 | tee {log}"
 
 
 rule create_HiC_Pro_config:
     input:
-        template="templates/HiC-Pro_config.template",
-        chromosome_sizes="{WORKDIR}/HiC-Pro/chromosome_sizes.txt",
-        genome_fragment="{WORKDIR}/HiC-Pro/restriction_sites.txt"
+        template="../templates/HiC-Pro_config.template",
+        chromosome_sizes="HiC-Pro/chromosome_sizes.txt",
+        genome_fragment="HiC-Pro/restriction_sites.txt"
     output:
-        "{WORKDIR}/HiC-Pro/config.txt"
+        "HiC-Pro/config.txt"
     params:
-        genome_index_path="{WORKDIR}/HiC-Pro/bowtie2_index", 
+        genome_index_path="HiC-Pro/bowtie2_index", 
     script:
         "scripts/create_HiC_Pro_config.py"
 
 
 rule run_HiC_Pro:
     input:
-        config="3d_n_crassa/HiC-Pro/config.txt"
+        config="HiC-Pro/config.txt",
+        genome_index="HiC-Pro/bowtie2_index/genome.1.bt2"
+    output:
+        expand("HiC-Pro/output/logs/{sra_id}/build_raw_maps.log",
+            sra_id=config['sra_ids'])
     container:
-        "images/hicpro.sif"
+        "../images/hicpro_3.1.0_ubuntu.img"
+    threads: 8
     shell:
-        "HiC-Pro -i ./3d_n_crassa/raw_data -o ./3d_n_crassa/output -c {input.config}"
+        "HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
