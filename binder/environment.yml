@@ -9,19 +9,12 @@ channels:
 dependencies:
   - python>=3.8
   - snakemake-minimal
+  # Build DAG with Snakemake
+  - graphviz
   # FASTQ file manipulation
   # https://anaconda.org/bioconda/seqkit
   # https://bioinf.shenwei.me/seqkit/
   - seqkit
-  # fasterq-dump
-  - sra-tools
-  # pigz: parralel implementation of gzip
-  - pigz
-  # Python library to read fasta files
-  - biopython
-  # Build DAG with Snakemake
-  - graphviz
-  # Create HiC-Pro config file with template
-  - jinja2
+
 
   

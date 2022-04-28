@@ -88,21 +88,24 @@ bash prepare_n_crassa_genome.sh
 Run 3D model construction:
 
 ```bash
-snakemake --cores 4 --use-singularity
+snakemake --cores 4 --use-singularity --use-conda
 ```
 
 or with debugging options:
 
 ```bash
-snakemake --cores 4 --use-singularity -p --verbose
+snakemake --cores 4 --use-singularity --use-conda -p --verbose
 ```
 
 ## Build DAG graph
 
 ```bash
+snakemake --rulegraph  | dot -Tpdf > rules.pdf
+```
+
+With wildcards:
+
+```bash
 snakemake --dag  | dot -Tpdf > dag.pdf
 ```
 
-```bash
-snakemake --rulegraph  | dot -Tpdf > rules.pdf
-```

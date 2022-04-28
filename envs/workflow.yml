@@ -1,0 +1,21 @@
+name: workflow
+# channels priority
+# see https://bioconda.github.io/
+# conda-forge has highest priority
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python>=3.8
+  # fasterq-dump
+  - sra-tools
+  # pigz: parallel implementation of gzip
+  - pigz
+  # Python library to read fasta files
+  - biopython
+  # Create HiC-Pro config file with template
+  - jinja2
+  # HiCPlotter dependencies
+  - scipy
+  - matplotlib
