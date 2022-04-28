@@ -146,7 +146,7 @@ rule run_HiC_Pro:
         "HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
 
 
-# Merge validPairs produced by HiC-Prot
+# Merge validPairs produced by HiC-Pro
 # See https://github.com/nservant/HiC-Pro/issues/121
 rule copy_HiC_Pro_valid_pairs:
     input:
