@@ -3,8 +3,8 @@
 ## Download this repository
 
 ```bash
-$ git clone https://github.com/data-fun/3d-genome-builder.git
-$ cd 3d-genome-builder
+git clone https://github.com/data-fun/3d-genome-builder.git
+cd 3d-genome-builder
 ```
 
 ## Install dependencies
@@ -16,7 +16,11 @@ Download last version [here](https://github.com/apptainer/singularity/releases)
 Install package:
 
 ```bash
-$ sudo apt install -y ./singularity-container_3.8.7_amd64.deb
+sudo apt install -y ./singularity-container_3.8.7_amd64.deb
+
+Verify version:
+
+```
 $ singularity --version
 singularity version 3.8.7
 ```
