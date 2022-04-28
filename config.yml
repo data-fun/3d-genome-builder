@@ -11,4 +11,8 @@ sra_ids:
 - SRR2105871
 - SRR2105872
 hicpro_restriction_sites: "dpnii T^TAA"
-
+hicpro_resolutions:
+- 10000
+- 20000
+- 40000
+- 50000

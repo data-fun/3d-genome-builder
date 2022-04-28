@@ -8,5 +8,6 @@ with open(snakemake.input[0], "r") as template_file, \
     out_file.write(template.render(
         genome_index_path=str(Path(snakemake.params.genome_index_path).resolve()) + "/",
         chromosome_sizes=Path(snakemake.input.chromosome_sizes).resolve(),
-        genome_fragment=Path(snakemake.input.genome_fragment).resolve()
+        genome_fragment=Path(snakemake.input.genome_fragment).resolve(),
+        resolutions=" ".join([str(res) for res in snakemake.params.resolutions])
         ))
