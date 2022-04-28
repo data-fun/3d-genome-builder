@@ -28,14 +28,18 @@ wget https://ftp.ncbi.nlm.nih.gov/geo/series/GSE173nnn/GSE173593/suppl/GSE173593
 /usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py -r dpnii T^TAA -o ./Neurospora/HiC-Pro_config_files/Neurospora_DpnII-MseI ./Neurospora/Neurospora_genome.fasta
 
 #Generate Bowtie2 index
-bowtie2-build ./Neurospora_genome.fasta neurospora
+bowtie2-build ./Neurospora/Neurospora_genome.fasta neurospora
 #Put result files in species_name/HiC-Pro_config_files/index
 
 #Run HiC-Pro
-HiC-Pro -i ./raw_data -o ./output -c ./HiC-Pro_config_files/config-hicpro.txt
+HiC-Pro -i ./Neurospora/raw_data -o ./Neurospora/output -c ./Neurospora/HiC-Pro_config_files/config-hicpro.txt
 
 #Merge samples 1 to 5 by reruning HiC-Pro on .validpairs in merge_data folder https://github.com/nservant/HiC-Pro/issues/121
-HiC-Pro -i ./merged_samples -o ./output -c ./HiC-Pro_config_files/config-hicpro.txt -s merge_persample -s build_contact_maps -s ice_norm
+cp ./Neurospora/output/hic_results/data/sample_1/SRR16761089_neurospora.bwt2pairs.validPairs ./Neurospora/merged_samples/sample_merge
+cp ./Neurospora/output/hic_results/data/sample_2/SRR14362684_neurospora.bwt2pairs.validPairs ./Neurospora/merged_samples/sample_merge
+cp ./Neurospora/output/hic_results/data/sample_3/SRR16761090_neurospora.bwt2pairs.validPairs ./Neurospora/merged_samples/sample_merge
+
+HiC-Pro -i ./Neurospora/merged_samples -o ./output -c ./Neurospora/HiC-Pro_config_files/config-hicpro.txt -s merge_persample -s build_contact_maps -s ice_norm
 
 
 #download HiCPlotter
