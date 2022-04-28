@@ -8,3 +8,9 @@
 images/*
 !images/.gitkeep
 
+# HiCPlotter script
+scripts/HiCPlotter.py
+
+# dag
+rules.pdf
+dag.pdf
