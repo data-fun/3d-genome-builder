@@ -6,7 +6,10 @@ workdir: f"{WORKDIR}"
 
 rule all:
     input:
-        expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"])
+        expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"]),
+        expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
+        expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
+        expand("pastis/{resolution}/structure.pdb", resolution=config["pastis_resolutions"]),
 
 
 
@@ -200,3 +203,64 @@ rule run_HiCPlotter:
         "-chr chr1 "       # chromosome to be plotted
         "-hmc 4 && "
         "touch {output}"   # dummy output files
+
+
+rule convert_matrix_sparse_to_dense:
+    input:
+        bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
+        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix"
+    output:
+        "dense_matrix/merge_{resolution}_dense.matrix"
+    message:
+        "Converting sparse to dense matrix"
+    container:
+        "../images/hicpro_3.1.0_ubuntu.img"
+    shell:
+        "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/sparseToDense.py "
+        "--bins {input.bed} "
+        "--output {output} "
+        "{input.matrix} "
+
+
+rule convert_matrix_to_numpy_array:
+    input:
+        "dense_matrix/merge_{resolution}_dense.matrix"
+    output:
+        "dense_matrix/merge_{resolution}_dense.npy"
+    message:
+        "Converting matrix to numpy array"
+    conda:
+        "envs/workflow.yml"
+    script:
+        "scripts/convert_matrix_to_numpy_array.py"
+
+
+rule create_pastis_config:
+    input:
+        template="../templates/Pastis_config.template",
+        chromosome_sizes="HiC-Pro/chromosome_sizes.txt",
+        npy="dense_matrix/merge_{resolution}_dense.npy"
+    output:
+        chromosome_sizes="pastis/{resolution}/sizes.txt",
+        config="pastis/{resolution}/config.ini"
+    message:
+        "Building Pastis configuration file: {output.config}"
+    conda:
+        "envs/workflow.yml"
+    script:
+        "scripts/create_Pastis_config.py"
+
+
+rule run_pastis:
+    input:
+        chromosome_sizes="pastis/{resolution}/sizes.txt",
+        npy="dense_matrix/merge_{resolution}_dense.npy",
+        config="pastis/{resolution}/config.ini"
+    output:
+        "pastis/{resolution}/structure.pdb"
+    message:
+        "Running Pastis at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "pastis-pm2 pastis/{wildcards.resolution}"

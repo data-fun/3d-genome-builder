@@ -1,0 +1,6 @@
+[all]
+resolution: {{ resolution }}
+output_name: structure.pdb
+chromosomes: {{ chromosomes }}
+organism_structure: {{ sizes }}
+counts: {{ npy }}
