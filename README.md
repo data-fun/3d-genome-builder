@@ -80,34 +80,34 @@ $ singularity exec images/hicpro.sif bowtie2 --version  2>/dev/null | head -n 1
 
 Create and edit the configuration file in yaml format. See for instance `config.yml`
 
-## Add reference genome (mandatory)
+## Add reference genome
 
-The reference genome fasta file must be located in `3d_genome_n_crassa/genome.fasta` where `3d_genome_n_crassa` is the name of the working directory as specified in the config file `config.yml`.
+The reference genome fasta file must be located in `WORKING_DIR/genome.fasta` where `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
 
 ## Add FASTQ files (optional)
 
-If you already have fastq files stored locally or fastq files are not available on GEO or SRA, you can use these files providing they are in the proper directory structure:
+If you already have fastq files stored locally or some fastq files are not available on GEO or SRA, you can use these files providing they are in the proper directory structure:
 
 ```
-3d_genome_n_crassa/
+WORKING_DIR/
 ├── fastq_files
-│   ├── SRR2105869
-│   │   ├── SRR2105869_R1.fastq.gz
-│   │   └── SRR2105869_R2.fastq.gz
-│   ├── SRR2105870
-│   │   ├── SRR2105870_R1.fastq.gz
-│   │   └── SRR2105870_R2.fastq.gz
-│   ├── SRR2105871
-│   │   ├── SRR2105871_R1.fastq.gz
-│   │   └── SRR2105871_R2.fastq.gz
-│   └── SRR2105872
-│       ├── SRR2105872_R1.fastq.gz
-│       └── SRR2105872_R2.fastq.gz
+│   ├── ID1
+│   │   ├── ID1_R1.fastq.gz
+│   │   └── ID1_R2.fastq.gz
+│   ├── ID2
+│   │   ├── ID2_R1.fastq.gz
+│   │   └── ID2_R2.fastq.gz
+│   ├── ID3
+│   │   ├── ID3_R1.fastq.gz
+│   │   └── ID3_R2.fastq.gz
+│   └── ID4
+│       ├── ID4_R1.fastq.gz
+│       └── ID4_R2.fastq.gz
 ├── genome.fasta
 ```
 
-- `3d_genome_n_crassa` is the name of the working directory as specified in the config file `config.yml`.
-- Paired-end fastq files are in the directory `3d_genome_n_crassa/fastq_files/FASTQ_ID` with `FASTQ_ID` the identifier of the paired fastq files. Ftasq identifiers are reported in the config file (`config.yml`).
+- `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
+- Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`).
 
 
 ## Build model
@@ -124,44 +124,22 @@ or with debugging options:
 snakemake --configfile config.yml --cores 4 --use-singularity --use-conda -p --verbose
 ```
 
+Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
+
 ## Example: build model for *Neurospora crassa*
 
-Download and prepare genome sequence:
+1. Download and prepare genome sequence:
 
 ```bash
 bash prepare_n_crassa_genome.sh
 ```
 
-Define parameters in `config.yml`:
+2. Define parameters in `[config_n_crassa.yml](config_n_crassa.yml)`:
 
-```
-workdir: "3d_genome_n_crassa"
-
-organism: "Neurospora crassa"
-
-sra_ids:
-- SRR2105869
-- SRR2105870
-- SRR2105871
-- SRR2105872
-
-hicpro_restriction_sites: "dpnii T^TAA"
-
-hicpro_resolutions:
-- 10000
-- 20000
-- 40000
-- 50000
-
-pastis_resolutions:
-- 50000
-- 40000
-```
-
-Run the 3D model construction:
+3. Run the 3D model construction:
 
 ```bash
-snakemake --configfile config.yml --cores 4 --use-singularity --use-conda
+snakemake --configfile config_n_crassa.yml --cores 4 --use-singularity --use-conda
 ```
 
 
