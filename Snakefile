@@ -1,8 +1,6 @@
-configfile: "config.yml"
+ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
 
-ORGANISM_NAME = f"{config['organism_name_short'].lower()}"
-WORKDIR = f"3d_{ORGANISM_NAME}"
-workdir: f"{WORKDIR}"
+workdir: f"{config['workdir'].replace(' ', '_')}"
 
 rule all:
     input:
@@ -10,7 +8,6 @@ rule all:
         expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
         expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
         expand("pastis/{resolution}/structure.pdb", resolution=config["pastis_resolutions"]),
-
 
 
 # fasterq-dump documentation:

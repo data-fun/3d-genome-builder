@@ -1,5 +1,5 @@
-# Target folder
-target_folder="n_crassa"
+# Create target folder
+target_folder="3d_genome_n_crassa"
 mkdir -p "${target_folder}"
 
 # Download genome sequence

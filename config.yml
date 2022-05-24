@@ -1,20 +1,21 @@
-organism_name_long: "Neurospora crassa"
-organism_name_short: "N_crassa"
+workdir: "3d_genome_n_crassa"
+
+organism: "Neurospora crassa"
+
 sra_ids:
-#- SRR14362684
-#- SRR16761089
-#- SRR16761090
-#- SRR16761091
-#- SRR16761092
 - SRR2105869
 - SRR2105870
 - SRR2105871
 - SRR2105872
+
 hicpro_restriction_sites: "dpnii T^TAA"
+
 hicpro_resolutions:
 - 10000
 - 20000
 - 40000
 - 50000
+
 pastis_resolutions:
 - 50000
+- 40000

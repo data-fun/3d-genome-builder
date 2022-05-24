@@ -78,10 +78,53 @@ $ singularity exec images/hicpro.sif bowtie2 --version  2>/dev/null | head -n 1
 
 ## Add parameters
 
-Create and edit the configuration file `config.yml`
+Create and edit the configuration file in yaml format. See for instance `config.yml`
+
+## Add reference genome (mandatory)
+
+The reference genome fasta file must be located in `3d_genome_n_crassa/genome.fasta` where `3d_genome_n_crassa` is the name of the working directory as specified in the config file `config.yml`.
+
+## Add FASTQ files (optional)
+
+If you already have fastq files stored locally or fastq files are not available on GEO or SRA, you can use these files providing they are in the proper directory structure:
+
+```
+3d_genome_n_crassa/
+├── fastq_files
+│   ├── SRR2105869
+│   │   ├── SRR2105869_R1.fastq.gz
+│   │   └── SRR2105869_R2.fastq.gz
+│   ├── SRR2105870
+│   │   ├── SRR2105870_R1.fastq.gz
+│   │   └── SRR2105870_R2.fastq.gz
+│   ├── SRR2105871
+│   │   ├── SRR2105871_R1.fastq.gz
+│   │   └── SRR2105871_R2.fastq.gz
+│   └── SRR2105872
+│       ├── SRR2105872_R1.fastq.gz
+│       └── SRR2105872_R2.fastq.gz
+├── genome.fasta
+```
+
+- `3d_genome_n_crassa` is the name of the working directory as specified in the config file `config.yml`.
+- Paired-end fastq files are in the directory `3d_genome_n_crassa/fastq_files/FASTQ_ID` with `FASTQ_ID` the identifier of the paired fastq files. Ftasq identifiers are reported in the config file (`config.yml`).
 
 
 ## Build model
+
+Run 3D model construction:
+
+```bash
+snakemake --configfile config.yml --cores 4 --use-singularity --use-conda
+```
+
+or with debugging options:
+
+```bash
+snakemake --configfile config.yml --cores 4 --use-singularity --use-conda -p --verbose
+```
+
+## Example: build model for *Neurospora crassa*
 
 Download and prepare genome sequence:
 
@@ -89,27 +132,50 @@ Download and prepare genome sequence:
 bash prepare_n_crassa_genome.sh
 ```
 
-Run 3D model construction:
+Define parameters in `config.yml`:
 
-```bash
-snakemake --cores 4 --use-singularity --use-conda
+```
+workdir: "3d_genome_n_crassa"
+
+organism: "Neurospora crassa"
+
+sra_ids:
+- SRR2105869
+- SRR2105870
+- SRR2105871
+- SRR2105872
+
+hicpro_restriction_sites: "dpnii T^TAA"
+
+hicpro_resolutions:
+- 10000
+- 20000
+- 40000
+- 50000
+
+pastis_resolutions:
+- 50000
+- 40000
 ```
 
-or with debugging options:
+Run the 3D model construction:
 
 ```bash
-snakemake --cores 4 --use-singularity --use-conda -p --verbose
+snakemake --configfile config.yml --cores 4 --use-singularity --use-conda
 ```
+
 
 ## Build DAG graph
 
+For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
+
 ```bash
-snakemake --rulegraph  | dot -Tpdf > rules.pdf
+snakemake --configfile config.yml --rulegraph  | dot -Tpdf > rules.pdf
 ```
 
 With wildcards:
 
 ```bash
-snakemake --dag  | dot -Tpdf > dag.pdf
+snakemake --configfile config.yml --dag  | dot -Tpdf > dag.pdf
 ```
 
