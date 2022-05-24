@@ -130,17 +130,17 @@ Depending on the number and size of fastq files, the 3D construction will take a
 
 1. Download and prepare genome sequence:
 
-```bash
-bash prepare_n_crassa_genome.sh
-```
+    ```bash
+    bash prepare_n_crassa_genome.sh
+    ```
 
-2. Define parameters in `[config_n_crassa.yml](config_n_crassa.yml)`:
+2. Define parameters in [config_n_crassa.yml](config_n_crassa.yml).
 
 3. Run the 3D model construction:
 
-```bash
-snakemake --configfile config_n_crassa.yml --cores 4 --use-singularity --use-conda
-```
+    ```bash
+    snakemake --configfile config_n_crassa.yml --cores 4 --use-singularity --use-conda
+    ```
 
 
 ## Build DAG graph
