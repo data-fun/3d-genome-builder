@@ -17,6 +17,7 @@ Install package:
 
 ```bash
 sudo apt install -y ./singularity-container_3.8.7_amd64.deb
+```
 
 Verify version:
 
