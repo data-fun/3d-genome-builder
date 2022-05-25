@@ -111,6 +111,7 @@ WORKING_DIR/
 - Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`).
 
 > **Note**
+>
 > Please strictly follow this file organization as it is later expected by the 3D model construction workflow.
 
 ## Build model
