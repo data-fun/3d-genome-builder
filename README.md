@@ -34,7 +34,7 @@ wget https://gitee.com/simonjyoung/HiCPlotter/raw/master/HiCPlotter.py -P script
 
 ### Conda environment
 
-Install conda.
+Install [conda](https://docs.conda.io/en/latest/miniconda.html).
 
 Install mamba:
 
@@ -110,6 +110,8 @@ WORKING_DIR/
 - `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
 - Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`).
 
+> **Note**
+> Please strictly follow this file organization as it is later expected by the 3D model construction workflow.
 
 ## Build model
 
