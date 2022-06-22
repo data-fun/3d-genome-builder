@@ -15,6 +15,9 @@ dependencies:
   # https://anaconda.org/bioconda/seqkit
   # https://bioinf.shenwei.me/seqkit/
   - seqkit
+  # Fasta and PDB files manipulation
+  - biopython
+  - biopandas
 
 
   
