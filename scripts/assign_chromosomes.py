@@ -3,7 +3,7 @@
 It requires:
 - a PDB file containing the genome structure,
 - a fasta file containing the genome sequence,
-- a resolution.
+- a Hi-C resolution.
 """
 
 import argparse
