@@ -47,7 +47,7 @@ def get_cli_arguments():
         "--annotation",
         action="store",
         type=str,
-        help="txt file containing the annotation of centromeres and telomeres",
+        help="txt file containing the annotation of genes",
         required=True,
     )
     parser.add_argument(
@@ -159,11 +159,11 @@ def interpolate_genes(pdb_name_in, chromosome_length, annotation, HiC_resolution
     pdb_coordinates_df_output = pdb_coordinates_df_output.assign(record_name="ATOM",
                                                                     atom_number=list(range(0,len(new_atoms))),
                                                                     blank_1="",
-                                                                    atom_name="G",
+                                                                    atom_name="O",
                                                                     alt_loc="",
                                                                     residue_name="CHR",
                                                                     blank_2="",
-                                                                    chain_id="A",
+                                                                    chain_id="G",
                                                                     insertion="",
                                                                     blank_3="",
                                                                     occupancy=1,
@@ -176,6 +176,7 @@ def interpolate_genes(pdb_name_in, chromosome_length, annotation, HiC_resolution
 
     pdb_coordinates.df["ATOM"] = pdb_coordinates_df_output
     pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
+    print(f"Wrote {pdb_name_out}")
 
 
 if __name__ == "__main__":

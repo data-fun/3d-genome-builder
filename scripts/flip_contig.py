@@ -108,7 +108,6 @@ def extract_chromosome_name(fasta_name):
         print(f"Reading {fasta_name}")
         for record in SeqIO.parse(fasta_file, "fasta"):
             name = record.id
-            print(f"Found chromosome {name}")
             chromosome_name_lst.append(name)
     return chromosome_name_lst
 
@@ -165,7 +164,7 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
         chromosome_sequence = str(genome_fasta[name].seq)
 
         # Select extremities of inverted contigs, i.e. beads further than 3*mean(distances) from the next bead.
-        pdb_coordinates_chrom_x["distance"] = Euclydian_distances_after
+        pdb_coordinates_chrom_x = pdb_coordinates_chrom_x.assign(distance = Euclydian_distances_after)
         flipping_limits = pdb_coordinates_chrom_x["distance"]>3*np.mean(pdb_coordinates_chrom_x["distance"])
         flipping_limits_index = list(pdb_coordinates_chrom_x[flipping_limits].index)
 
@@ -179,7 +178,7 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
                 pdb_coordinates_chrom_x = pd.concat([pdb_coordinates_chrom_x.iloc[:flipping_limits_index[j]+1,:], flipped_atoms.iloc[:,], pdb_coordinates_chrom_x.iloc[flipping_limits_index[j+1]+1:,]], axis=0)
                 
                 # Flip the bases corresponding th the inverted contigs
-                print("Flipping bases n°"+str(flipping_limits_index[j]+1)+" to n°"+str(flipping_limits_index[j+1]+1))
+                print("Flipping bases n°"+str((flipping_limits_index[j]+1)*HiC_resolution)+" to n°"+str((flipping_limits_index[j+1]+1)*HiC_resolution))
                 flipped_contig = chromosome_sequence[(flipping_limits_index[j]+1)*HiC_resolution:(flipping_limits_index[j+1]+1)*HiC_resolution]
                 flipped_contig = flipped_contig[::-1]
                 chromosome_sequence = chromosome_sequence[:(flipping_limits_index[j]+1)*HiC_resolution]+flipped_contig+chromosome_sequence[(flipping_limits_index[j+1]+1)*HiC_resolution:]
