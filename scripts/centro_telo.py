@@ -1,16 +1,19 @@
-"""Annotate a PDB file containing a 3D genome structure with chromosome number.
+"""Annotate a PDB file containing a 3D genome structure with centromeres and telomeres.
 
 It requires:
 - a PDB file containing the genome structure,
 - a fasta file containing the genome sequence,
+- a txt file containing the centromere and telomere positions,
 - a resolution.
 """
 
 import argparse
 import math
+import pandas as pd
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
+
 
 
 def get_cli_arguments():
@@ -36,6 +39,14 @@ def get_cli_arguments():
         action="store",
         type=str,
         help="Fasta file containing the sequence of the genome",
+        required=True,
+    )
+    parser.add_argument(
+        "-a",
+        "--annotation",
+        action="store",
+        type=str,
+        help="txt file containing the annotation of centromeres and telomeres",
         required=True,
     )
     parser.add_argument(
@@ -80,8 +91,16 @@ def extract_chromosome_length(fasta_name):
     return chromosome_length_lst
 
 
-def assign_chromosome_number(pdb_name_in, chromosome_length, HiC_resolution, pdb_name_out):
-    """Assign chromosome numbers to the whole genome 3D structure.
+def del_index(index, list):
+    outliers_bp_coordinates_chrom_x = []
+    for ele in sorted(index, reverse = True):
+        outliers_bp_coordinates_chrom_x.append(list[ele])
+        del list[ele]
+    return [list, outliers_bp_coordinates_chrom_x]
+
+
+def assign_centromere_telomere(pdb_name_in, chromosome_length, annotation, HiC_resolution, pdb_name_out):
+    """Annotate centromeres and telomeres to the whole genome 3D structure : C for centromeres, T for telomeres and S for sequence.
 
     Note:
     - The PDB file produced by Pastis is not readable by Biopython
@@ -94,6 +113,8 @@ def assign_chromosome_number(pdb_name_in, chromosome_length, HiC_resolution, pdb
         PDB file containing the 3D structure of the genome
     chromosome_length : list
         List with chromosome lengths
+    annotation : str
+        txt file containing the annotation of centromeres and telomeres
     HiC_resolution : int
         HiC resolution
     pdb_name_out : str
@@ -104,19 +125,28 @@ def assign_chromosome_number(pdb_name_in, chromosome_length, HiC_resolution, pdb
 
     beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
     print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+
+    pdb_coordinates_df = pdb_coordinates.df["ATOM"]
+    pdb_coordinates_df_output = pd.DataFrame()
+
+    # Read annotation file
+    centromeres = pd.read_csv(annotation, sep="\t", header=None)
+
+    for i in range(len(chromosome_length)):
+        chrom_x = pdb_coordinates_df[pdb_coordinates_df["residue_number"]==i+1]
+        chrom_x.reset_index(drop=True, inplace=True)
+        chrom_x = chrom_x.assign(atoms_bp_coor=pd.Series(list(range(0, chromosome_length[i], HiC_resolution))))
+        
+
+        # Annotate beads included in centromeres and telomeres
+        chrom_x["chain_id"] = "S"
+        chrom_x.loc[chrom_x["atoms_bp_coor"].between(centromeres.iloc[i, 1], centromeres.iloc[i, 2]), "chain_id"] = "C"
+        print(str(sum(chrom_x["chain_id"]=="C"))+" beads associated to the centromere of chromosome "+str(i+1))
+        
+        pdb_coordinates_df_output = pd.concat([pdb_coordinates_df_output, chrom_x.iloc[:,:-1]], axis=0)
+
     
-    # Add residue number
-    residue_number = []
-    for index, bead_number in enumerate(beads_per_chromosome):
-        residue_number = residue_number + [index+1] * bead_number
-    pdb_coordinates.df["ATOM"]["residue_number"] = residue_number
-
-    # Add residue name
-    pdb_coordinates.df["ATOM"]["residue_name"] = "CHR"
-
-    # Fix atom number starting at 1 (instead of 0)
-    pdb_coordinates.df["ATOM"]["atom_number"] = pdb_coordinates.df["ATOM"]["atom_number"] + 1 
-
+    pdb_coordinates.df["ATOM"] = pdb_coordinates_df_output
     pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
     print(f"Wrote {pdb_name_out}")
 
@@ -128,4 +158,4 @@ if __name__ == "__main__":
     CHROMOSOME_LENGTH = extract_chromosome_length(ARGS.fasta)
 
     # Assign chromosome number
-    assign_chromosome_number(ARGS.pdb, CHROMOSOME_LENGTH, ARGS.resolution, ARGS.output)
+    assign_centromere_telomere(ARGS.pdb, CHROMOSOME_LENGTH, ARGS.annotation, ARGS.resolution, ARGS.output)
