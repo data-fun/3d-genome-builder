@@ -8,9 +8,32 @@ It requires:
 
 import argparse
 import math
+from pathlib import Path
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
+
+
+
+def is_file(parser, file_path):
+    """Check file exists.
+    
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        Command line argument parser
+    file_path : str
+        File path
+    Returns
+    -------
+    str
+        File path    
+    """
+    print(type(parser))
+    if not Path(file_path).is_file():
+        parser.error(f"The file {file_path} does not exist")
+    else:
+        return file_path
 
 
 def get_cli_arguments():
@@ -26,7 +49,7 @@ def get_cli_arguments():
         "-p",
         "--pdb",
         action="store",
-        type=str,
+        type=lambda name: is_file(parser, name),
         help="PDB file containing the 3D structure of the genome",
         required=True,
     )
@@ -34,7 +57,7 @@ def get_cli_arguments():
         "-f",
         "--fasta",
         action="store",
-        type=str,
+        type=lambda name: is_file(parser, name),
         help="Fasta file containing the sequence of the genome",
         required=True,
     )
