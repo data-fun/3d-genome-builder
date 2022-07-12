@@ -1,0 +1,17 @@
+name: workflow_structure
+# channels priority
+# see https://bioconda.github.io/
+# conda-forge has highest priority
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python>=3.8
+  - scipy
+  - matplotlib
+  - pandas
+  # Python library to read fasta files
+  - biopython
+  # Python library to read pdb files
+  - biopandas

@@ -147,6 +147,12 @@ Depending on the number and size of fastq files, the 3D construction will take a
     ```
 
 
+## Enhance 3D model
+
+```bash
+snakemake --snakefile enhance_structure.smk --configfile config_n_crassa.yml --cores 2 --use-conda
+```
+
 ## Build DAG graph
 
 For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
