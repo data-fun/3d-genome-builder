@@ -7,10 +7,8 @@ It requires:
 """
 
 import argparse
-import math
 import pandas as pd
 
-from Bio import SeqIO
 from biopandas.pdb import PandasPdb
 from scipy.interpolate import PchipInterpolator
 
@@ -32,22 +30,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
-        "--fasta",
-        action="store",
-        type=str,
-        help="Fasta file containing the sequence of the genome",
-        required=True,
-    )
-    parser.add_argument(
-        "-r",
-        "--resolution",
-        action="store",
-        type=int,
-        help="HiC resolution",
-        required=True,
-    )
-    parser.add_argument(
         "-o",
         "--output",
         action="store",
@@ -58,29 +40,6 @@ def get_cli_arguments():
     return parser.parse_args()
 
 
-def extract_chromosome_length(fasta_name):
-    """Extract chromosome length from a FASTA file.
-
-    Parameters
-    ----------
-    fasta_name : str
-        Name of Fasta file containing the sequence of the genome
-    
-    Returns
-    -------
-    list
-        List of chromosome lengthes
-    """
-    chromosome_length_lst = []
-    with open(fasta_name, "r") as fasta_file:
-        print(f"Reading {fasta_name}")
-        for record in SeqIO.parse(fasta_file, "fasta"):
-            length = len(record.seq)
-            print(f"Found chromosome {record.id} with {length} bases")
-            chromosome_length_lst.append(length)
-    return chromosome_length_lst
-
-
 def del_index(index, list):
     outliers_bp_coordinates_chrom_x = []
     for ele in sorted(index, reverse = True):
@@ -89,7 +48,7 @@ def del_index(index, list):
     return [list, outliers_bp_coordinates_chrom_x]
 
 
-def interpolate_nan_coordinates(pdb_name_in, chromosome_length, HiC_resolution, pdb_name_out):
+def interpolate_nan_coordinates(pdb_name_in, pdb_name_out):
     """Interpolate nan 3D coordinates in a PDB file containing a 3D genome structure.
 
     Note:
@@ -101,46 +60,38 @@ def interpolate_nan_coordinates(pdb_name_in, chromosome_length, HiC_resolution, 
     ----------
     pdb_name_in : str
         PDB file containing the 3D structure of the genome
-    chromosome_length : list
-        List with chromosome lengths
-    HiC_resolution : int
-        HiC resolution
     pdb_name_out : str
         Output PDB file containing the annotated 3D structure of the genome
     """
     pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
     print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
 
-    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
-
     # Tag beads with nan coordinates as "missing"
     pdb_coordinates_df = pdb_coordinates.df["ATOM"]
     pdb_coordinates_missing = pdb_coordinates_df.assign(missing = "point")
     pdb_coordinates_missing.loc[pdb_coordinates_missing["x_coord"].isnull(), "missing"] = "missing"
     index_whole_genome = pdb_coordinates_missing.loc[pdb_coordinates_missing["missing"]=="missing"].index.values.tolist()
+    chromosomes_number = max(pdb_coordinates_df["residue_number"])
 
-    for i in range(len(chromosome_length)):
-
+    for i in range(chromosomes_number):
         # Select index of missing values from one chromosome
         chrom_x = pdb_coordinates_missing[pdb_coordinates_missing["residue_number"]==i+1]
         chrom_x.reset_index(drop=True, inplace=True)
-        atoms_bp_coor = list(range(0, chromosome_length[i], HiC_resolution))
+        index_known_beads = chrom_x.loc[chrom_x["missing"]=="point"].index.values.tolist()
         index = chrom_x.loc[chrom_x["missing"]=="missing"].index.values.tolist()
 
         if index != []:
             print(str(len(index))+" missing beads in chromosome "+str(i+1)+" !")
 
             # Interpolate missing beads coordinates from the other beads coordinates
-            atoms_bp_coor, missing_bp_coordinates_chrom_x = del_index(index, atoms_bp_coor)
             chrom_x = chrom_x[chrom_x["missing"]=="point"]
             chrom_x_list = [list(chrom_x["x_coord"]), list(chrom_x["y_coord"]), list(chrom_x["z_coord"])]
             x_3d_coor = chrom_x_list[0]
-            missing_new_x_3d_coor = PchipInterpolator(atoms_bp_coor, x_3d_coor)(missing_bp_coordinates_chrom_x)
+            missing_new_x_3d_coor = PchipInterpolator(index_known_beads, x_3d_coor)(index)
             y_3d_coor = chrom_x_list[1]
-            missing_new_y_3d_coor = PchipInterpolator(atoms_bp_coor, y_3d_coor)(missing_bp_coordinates_chrom_x)
+            missing_new_y_3d_coor = PchipInterpolator(index_known_beads, y_3d_coor)(index)
             z_3d_coor = chrom_x_list[2]
-            missing_new_z_3d_coor = PchipInterpolator(atoms_bp_coor, z_3d_coor)(missing_bp_coordinates_chrom_x)
+            missing_new_z_3d_coor = PchipInterpolator(index_known_beads, z_3d_coor)(index)
             zipped = list(zip(missing_new_x_3d_coor, missing_new_y_3d_coor, missing_new_z_3d_coor))
             new_atoms = pd.DataFrame(zipped, columns=["x_coord", "y_coord", "z_coord"], index=index_whole_genome[:len(index)])
             index_whole_genome = index_whole_genome[len(index):]
@@ -158,8 +109,5 @@ def interpolate_nan_coordinates(pdb_name_in, chromosome_length, HiC_resolution, 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
 
-    # Read Fasta file and get chromosome length
-    CHROMOSOME_LENGTH = extract_chromosome_length(ARGS.fasta)
-
     # Assign chromosome number
-    interpolate_nan_coordinates(ARGS.pdb, CHROMOSOME_LENGTH, ARGS.resolution, ARGS.output)
+    interpolate_nan_coordinates(ARGS.pdb, ARGS.output)
