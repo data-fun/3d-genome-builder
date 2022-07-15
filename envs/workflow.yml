@@ -1,4 +1,4 @@
-name: workflow
+name: 3d-genome-builder-workflow
 # channels priority
 # see https://bioconda.github.io/
 # conda-forge has highest priority
@@ -7,7 +7,7 @@ channels:
   - bioconda
   - conda-forge
 dependencies:
-  - python>=3.8
+  - python=3.9
   # fasterq-dump
   - sra-tools
   # pigz: parallel implementation of gzip
