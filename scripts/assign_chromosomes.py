@@ -29,7 +29,6 @@ def is_file(parser, file_path):
     str
         File path    
     """
-    print(type(parser))
     if not Path(file_path).is_file():
         parser.error(f"The file {file_path} does not exist")
     else:
