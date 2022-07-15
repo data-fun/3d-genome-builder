@@ -1,4 +1,4 @@
-name: workflow_structure
+name: 3d-genome-builder-workflow-structure
 # channels priority
 # see https://bioconda.github.io/
 # conda-forge has highest priority
