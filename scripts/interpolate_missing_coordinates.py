@@ -54,19 +54,32 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
     print(f"Found {atoms.shape[0]} beads in {pdb_name_in}")
     for residue_number in atoms["residue_number"].unique():
         missing_beads = (
-            atoms
-                .query(f"residue_number == {residue_number}")
-                [["x_coord", "y_coord", "z_coord"]].isna().sum().sum()
+            atoms.query(f"residue_number == {residue_number}")[
+                ["x_coord", "y_coord", "z_coord"]
+            ]
+            .isna()
+            .sum()
+            .sum()
         ) // 3
         if not missing_beads:
             continue
         print(f"Chromosome {residue_number} has {missing_beads} missing beads")
         chromosome = atoms.query(f"residue_number == {residue_number}")
-        beads_index = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"]).index.to_numpy()
-        beads_x = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])["x_coord"].to_numpy()
-        beads_y = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])["y_coord"].to_numpy()
-        beads_z = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])["z_coord"].to_numpy()
-        missing_beads_index = chromosome.loc[ chromosome[["x_coord", "y_coord", "z_coord"]].isna().any(1) ].index.to_numpy()
+        beads_index = chromosome.dropna(
+            subset=["x_coord", "y_coord", "z_coord"]
+        ).index.to_numpy()
+        beads_x = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
+            "x_coord"
+        ].to_numpy()
+        beads_y = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
+            "y_coord"
+        ].to_numpy()
+        beads_z = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
+            "z_coord"
+        ].to_numpy()
+        missing_beads_index = chromosome.loc[
+            chromosome[["x_coord", "y_coord", "z_coord"]].isna().any(1)
+        ].index.to_numpy()
         # Build models for each chromosome and each coordinate
         interpolate_x = PchipInterpolator(beads_index, beads_x)
         interpolate_y = PchipInterpolator(beads_index, beads_y)
@@ -75,9 +88,9 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
             atoms.loc[bead_index, "x_coord"] = interpolate_x(bead_index)
             atoms.loc[bead_index, "y_coord"] = interpolate_y(bead_index)
             atoms.loc[bead_index, "z_coord"] = interpolate_z(bead_index)
-    #atoms["atom_name"] = "CA"
-    #atoms["element_symbol"] = "C"
-    #atoms["b_factor"] = 0.0
+    # atoms["atom_name"] = "CA"
+    # atoms["element_symbol"] = "C"
+    # atoms["b_factor"] = 0.0
     pdb.df["ATOM"] = atoms
     pdb.to_pdb(pdb_name_out)
     print(f"Wrote {pdb_name_out}")

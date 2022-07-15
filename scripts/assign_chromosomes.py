@@ -14,7 +14,6 @@ from Bio import SeqIO
 from biopandas.pdb import PandasPdb
 
 
-
 def is_file(parser, file_path):
     """Check file exists.
     
@@ -59,11 +58,7 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "--resolution",
-        action="store",
-        type=int,
-        help="HiC resolution",
-        required=True,
+        "--resolution", action="store", type=int, help="HiC resolution", required=True,
     )
     parser.add_argument(
         "--output",
@@ -98,7 +93,9 @@ def extract_chromosome_length(fasta_name):
     return chromosome_length_lst
 
 
-def assign_chromosome_number(pdb_name_in, chromosome_length, HiC_resolution, pdb_name_out):
+def assign_chromosome_number(
+    pdb_name_in, chromosome_length, HiC_resolution, pdb_name_out
+):
     """Assign chromosome numbers to the whole genome 3D structure.
 
     Note:
@@ -120,22 +117,30 @@ def assign_chromosome_number(pdb_name_in, chromosome_length, HiC_resolution, pdb
     pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
     print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
 
-    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
-    
+    beads_per_chromosome = [
+        math.ceil(length / HiC_resolution) for length in chromosome_length
+    ]
+    print(
+        f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}"
+    )
+
     # Add residue number
     residue_number = []
     for index, bead_number in enumerate(beads_per_chromosome):
-        residue_number = residue_number + [index+1] * bead_number
+        residue_number = residue_number + [index + 1] * bead_number
     pdb_coordinates.df["ATOM"]["residue_number"] = residue_number
 
     # Add residue name
     pdb_coordinates.df["ATOM"]["residue_name"] = "CHR"
 
     # Fix atom number starting at 1 (instead of 0)
-    pdb_coordinates.df["ATOM"]["atom_number"] = pdb_coordinates.df["ATOM"]["atom_number"] + 1 
+    pdb_coordinates.df["ATOM"]["atom_number"] = (
+        pdb_coordinates.df["ATOM"]["atom_number"] + 1
+    )
 
-    pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
+    pdb_coordinates.to_pdb(
+        path=pdb_name_out, records=None, gz=False, append_newline=True
+    )
     print(f"Wrote {pdb_name_out}")
 
 
