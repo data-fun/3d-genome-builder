@@ -11,6 +11,8 @@ dependencies:
   - snakemake-minimal
   # Build DAG with Snakemake
   - graphviz
+  # Code cleaning
+  - black
   # FASTQ file manipulation
   # https://anaconda.org/bioconda/seqkit
   # https://bioinf.shenwei.me/seqkit/
