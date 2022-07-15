@@ -46,7 +46,6 @@ def get_cli_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
         "--pdb",
         action="store",
         type=lambda name: is_file(parser, name),
@@ -54,7 +53,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
         "--fasta",
         action="store",
         type=lambda name: is_file(parser, name),
@@ -62,7 +60,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-r",
         "--resolution",
         action="store",
         type=int,
@@ -70,7 +67,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-o",
         "--output",
         action="store",
         type=str,
