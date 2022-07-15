@@ -1,4 +1,4 @@
-"""Interpolate missing beads in a PDB file containing a 3D genome structure.
+"""Interpolate missing coordinates in a PDB file containing a 3D genome structure.
 
 This script requires:
 - a PDB file containing the genome structure.
