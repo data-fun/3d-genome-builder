@@ -17,4 +17,6 @@ hicpro_resolutions:
 - 50000
 
 pastis_resolutions:
+- 20000
+- 40000
 - 50000
