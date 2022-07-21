@@ -1,3 +1,5 @@
+import os
+
 ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
 
 workdir: f"{config['workdir'].replace(' ', '_')}"
@@ -6,8 +8,8 @@ rule all:
     input:
         expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"]),
         expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
-        expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
-        expand("pastis/{resolution}/structure.pdb", resolution=config["pastis_resolutions"]),
+        #expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
+        expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
 
 
 # fasterq-dump documentation:
@@ -261,3 +263,21 @@ rule run_pastis:
         "envs/workflow.yml"
     shell:
         "pastis-pm2 pastis/{wildcards.resolution}"
+
+
+rule run_pastis_nb:
+    input:
+        matrix="dense_matrix/merge_{resolution}_dense.matrix",
+        bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
+    output:
+        "pastis/structure_{resolution}.pdb"
+    message:
+        "Running Pastis NB at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/infer_structures_nb.py "
+        "--matrix {input.matrix} "
+        "--bed {input.bed} "
+        "--output {output}"
+
