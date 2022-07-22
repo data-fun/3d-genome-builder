@@ -7,7 +7,7 @@ workdir: f"{config['workdir'].replace(' ', '_')}"
 rule all:
     input:
         expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"]),
-        expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
+        #expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
         #expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
 
@@ -267,7 +267,8 @@ rule run_pastis:
 
 rule run_pastis_nb:
     input:
-        matrix="dense_matrix/merge_{resolution}_dense.matrix",
+        #matrix="dense_matrix/merge_{resolution}_dense.matrix",
+        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
     output:
         "pastis/structure_{resolution}.pdb"
@@ -275,9 +276,12 @@ rule run_pastis_nb:
         "Running Pastis NB at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/pastis_nb_{resolution}.log"
     shell:
         "python ../scripts/infer_structures_nb.py "
         "--matrix {input.matrix} "
         "--bed {input.bed} "
-        "--output {output}"
+        "--output {output} "
+        "2>&1 {log}"
 
