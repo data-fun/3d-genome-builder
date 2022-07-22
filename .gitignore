@@ -14,3 +14,8 @@ scripts/HiCPlotter.py
 # dag
 rules.pdf
 dag.pdf
+
+# Jupyter checkpoints
+# and temp notebooks
+.ipynb_checkpoints/
+Untitled*.ipynb
