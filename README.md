@@ -143,7 +143,7 @@ Depending on the number and size of fastq files, the 3D construction will take a
 3. Run the 3D model construction:
 
     ```bash
-    snakemake --configfile config_n_crassa.yml --cores 4 --use-singularity --use-conda
+    snakemake --profile snakemake_profile --configfile config_n_crassa.yml
     ```
 
 
