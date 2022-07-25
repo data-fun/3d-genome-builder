@@ -11,11 +11,9 @@ sra_ids:
 hicpro_restriction_sites: "dpnii T^TAA"
 
 hicpro_resolutions:
-- 20000
 - 40000
 - 50000
 
 pastis_resolutions:
-- 20000
 - 40000
 - 50000
