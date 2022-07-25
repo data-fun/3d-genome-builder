@@ -147,6 +147,10 @@ rule run_HiC_Pro:
     threads: 8
     shell:
         "LC_ALL=C; echo 'y' | HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
+    # LC_ALL=C prevents warning messages on locale settings
+    # /usr/bin/bash: warning: setlocale: LC_ALL: cannot change locale (fr_FR.UTF-8)
+    # echo 'y' automatically valids answer to
+    # [...]/HiC-Pro/output folder alreads exists. Do you want to overwrite it ? (y/n) [n] :
 
 
 # Merge validPairs produced by HiC-Pro
