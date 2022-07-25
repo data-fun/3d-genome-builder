@@ -110,7 +110,7 @@ rule build_genome_index:
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
     shell:
-        "bowtie2-build {input} HiC-Pro/bowtie2_index/genome 2>&1 | tee {log}"
+        "bowtie2-build {input} HiC-Pro/bowtie2_index/genome 2>&1 > {log}"
 
 
 rule create_HiC_Pro_config:
@@ -146,7 +146,7 @@ rule run_HiC_Pro:
         "../images/hicpro_3.1.0_ubuntu.img"
     threads: 8
     shell:
-        "HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
+        "echo 'y' | HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
 
 
 # Merge validPairs produced by HiC-Pro
