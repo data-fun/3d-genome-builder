@@ -11,9 +11,9 @@ cd 3d-genome-builder
 
 ### Singularity
 
-Download last version [here](https://github.com/apptainer/singularity/releases)
+Download the last version [here](https://github.com/apptainer/singularity/releases)
 
-Install package:
+Install Singularity:
 
 ```bash
 sudo apt install -y ./singularity-container_3.8.7_amd64.deb
@@ -64,7 +64,7 @@ wget --ciphers=DEFAULT:@SECLEVEL=1 https://zerkalo.curie.fr/partage/HiC-Pro/sing
 Verify HiC-Pro version with:
 
 ```bash
-$ singularity exec images/hicpro.sif HiC-Pro --version
+$ singularity exec images/hicpro_3.1.0_ubuntu.img HiC-Pro --version
 [...]
 HiC-Pro version 3.1.0
 ```
@@ -72,7 +72,7 @@ HiC-Pro version 3.1.0
 and bowtie2 version:
 
 ```bash
-$ singularity exec images/hicpro.sif bowtie2 --version  2>/dev/null | head -n 1
+$ singularity exec images/hicpro_3.1.0_ubuntu.img bowtie2 --version  2>/dev/null | head -n 1
 /usr/local/conda/envs/hicpro/bin/bowtie2-align-s version 2.4.4
 ```
 
