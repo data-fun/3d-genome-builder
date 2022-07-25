@@ -93,7 +93,7 @@ rule digest_genome:
         "-r {config[hicpro_restriction_sites]} "
         "-o {output} "
         "{input} "
-        "2>&1 > {log}"
+        "> {log} 2>&1 "
 
 
 # Build genome index
@@ -110,7 +110,7 @@ rule build_genome_index:
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
     shell:
-        "bowtie2-build {input} HiC-Pro/bowtie2_index/genome 2>&1 > {log}"
+        "bowtie2-build {input} HiC-Pro/bowtie2_index/genome > {log} 2>&1"
 
 
 rule create_HiC_Pro_config:
@@ -273,7 +273,8 @@ rule run_pastis:
 rule run_pastis_nb:
     input:
         #matrix="dense_matrix/merge_{resolution}_dense.matrix",
-        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
+        #matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
+        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix",
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
     output:
         "pastis/structure_{resolution}.pdb"
@@ -288,7 +289,7 @@ rule run_pastis_nb:
         "--matrix {input.matrix} "
         "--bed {input.bed} "
         "--output {output} "
-        "2>&1 > {log}"
+        "> {log} 2>&1 "
 
 
 rule clean:
