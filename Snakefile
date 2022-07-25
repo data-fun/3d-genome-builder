@@ -7,8 +7,6 @@ workdir: f"{config['workdir'].replace(' ', '_')}"
 rule all:
     input:
         expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"]),
-        #expand("dense_matrix/merge_{resolution}_dense.npy", resolution=config["hicpro_resolutions"]),
-        #expand("pastis/{resolution}/config.ini", resolution=config["pastis_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
 
 
@@ -84,6 +82,8 @@ rule digest_genome:
         "genome.fasta"
     output:
         "HiC-Pro/restriction_sites.txt"
+    log:
+        "logs/digest_genome.log"
     message:
         "Generating list of restriction fragments"
     container:
@@ -92,7 +92,8 @@ rule digest_genome:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py "
         "-r {config[hicpro_restriction_sites]} "
         "-o {output} "
-        "{input}"
+        "{input} "
+        "2>&1 > {log}"
 
 
 # Build genome index
@@ -135,10 +136,10 @@ rule run_HiC_Pro:
         config="HiC-Pro/config.txt",
         genome_index="HiC-Pro/bowtie2_index/genome.1.bt2",
         fastq_files=expand("fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz",
-                    sra_id=config["sra_ids"], paired=[1,2])
+                            sra_id=config["sra_ids"], paired=[1,2])
     output:
         expand("HiC-Pro/output/hic_results/data/{sra_id}/{sra_id}_genome.bwt2pairs.validPairs",
-        sra_id=config["sra_ids"])
+                sra_id=config["sra_ids"])
     message:
         "Running HiC-Pro"
     container:
@@ -283,5 +284,9 @@ rule run_pastis_nb:
         "--matrix {input.matrix} "
         "--bed {input.bed} "
         "--output {output} "
-        "2>&1 {log}"
+        "2>&1 > {log}"
 
+
+rule clean:
+    shell:
+        "rm -rf logs HiC-Pro dense_matrix pastis"
