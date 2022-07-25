@@ -30,7 +30,7 @@ rule download_fastq_files:
         "envs/workflow.yml"
     shell: 
         "fasterq-dump {wildcards.sra_id} --threads {threads} --log-level {params.loglevel} "
-        "{params.progress} --outdir {params.outdir} 2>&1 >{log}"
+        "{params.progress} --outdir {params.outdir} >{log} 2>&1 "
 
 
 rule rename_paired_fastq_files:
