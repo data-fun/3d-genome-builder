@@ -22,7 +22,11 @@ dependencies:
   # Pastis config file
   - pandas
   # Pastis
+  - scikit-learn
+  # Iced: https://github.com/hiclib/iced
+  # https://pypi.org/project/iced/
+  - iced
   - pip:
-    - iced
-    - scikit-learn
-    - pastis
+    # https://github.com/hiclib/pastis
+    # https://pypi.org/project/pastis/
+    - pastis==0.4.0
