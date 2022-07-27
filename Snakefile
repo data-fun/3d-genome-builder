@@ -172,8 +172,10 @@ rule run_HiC_Pro_on_valid_pairs:
         valid_pairs=expand("HiC-Pro/merged_samples/merge/{sra_id}_genome.bwt2pairs.validPairs",
                            sra_id=config["sra_ids"])
     output:
-        matrix=expand("HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
+        matrix_iced=expand("HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
                       resolution=config["hicpro_resolutions"]),
+        matrix_raw=expand("HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix",
+                   resolution=config["hicpro_resolutions"])
         bed=expand("HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
                    resolution=config["hicpro_resolutions"])
     message:
