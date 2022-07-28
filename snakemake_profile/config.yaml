@@ -1,5 +1,8 @@
 ---
 snakefile: Snakefile
-cores: 4
 use-conda: True
 use-singularity: True
+keep-going: True
+rerun-incomplete: True
+printshellcmds: True
+
