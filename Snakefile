@@ -296,4 +296,4 @@ rule run_pastis_nb:
 
 rule clean:
     shell:
-        "rm -rf logs HiC-Pro dense_matrix pastis"
+        "rm -rf logs HiC-Pro dense_matrix HiCPlotter pastis"
