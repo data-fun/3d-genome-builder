@@ -1,5 +1,6 @@
 ---
 snakefile: Snakefile
+configfile: config.yml
 use-conda: True
 use-singularity: True
 keep-going: True

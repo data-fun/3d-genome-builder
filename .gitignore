@@ -8,6 +8,9 @@
 images/*
 !images/.gitkeep
 
+# config file
+config.yml
+
 # HiCPlotter script
 scripts/HiCPlotter.py
 

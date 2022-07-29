@@ -1,18 +1,21 @@
+# Wording directory name, without space
 workdir: "name_of_the_working_directory"
 
+# Organism name
 organism: "name of the organism"
 
+# Sample identifiers
 sra_ids:
 - ID1
 - ID2
 - ID3
 - ID4
 
+# Choose appropriate restriction sites
 hicpro_restriction_sites: "dpnii T^TAA"
 
 # Choose appropriate resolution
 hicpro_resolutions:
-- 10000
 - 20000
 - 30000
 - 40000

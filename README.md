@@ -79,7 +79,7 @@ $ singularity exec images/hicpro_3.1.0_ubuntu.img bowtie2 --version  2>/dev/null
 
 ## Add parameters
 
-Create and edit the configuration file in yaml format. See for instance `config.yml`
+Create and edit the configuration file `config.yml` in yaml format. See for instance `config_template.yml`
 
 ## Add reference genome
 
@@ -108,7 +108,7 @@ WORKING_DIR/
 ```
 
 - `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
-- Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`).
+- Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`). Please note fastq files have to follow the pattern `<sample ID>_R<1 or 2>.fastq.gz`.
 
 > **Note**
 >
@@ -119,38 +119,46 @@ WORKING_DIR/
 Run 3D model construction:
 
 ```bash
-snakemake --configfile config.yml --cores 4 --use-singularity --use-conda
+snakemake --profile snakemake_profile -j 4
 ```
 
-or with debugging options:
+> **Note**
+>
+> Option `-j 4` tells Snakemake to use up to 4 cores. If you are more cores available, you can increase this value (*e.g.* `-j 16`).
+
+Or with debugging options:
 
 ```bash
-snakemake --configfile config.yml --cores 4 --use-singularity --use-conda -p --verbose
+snakemake --profile snakemake_profile -j 4 --verbose
 ```
 
 Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
 
 ## Example: build model for *Neurospora crassa*
 
-1. Download and prepare genome sequence:
+1. Download and prepare the reference genome sequence:
 
     ```bash
     bash prepare_n_crassa_genome.sh
     ```
 
-2. Define parameters in [config_n_crassa.yml](config_n_crassa.yml).
+2. Copy parameters from [config_n_crassa.yml](config_n_crassa.yml):
+
+    ```bash
+    cp config_n_crassa.yml config.yml
+    ```
 
 3. Run the 3D model construction:
 
     ```bash
-    snakemake --profile snakemake_profile --configfile config_n_crassa.yml
+    snakemake --profile snakemake_profile -j 4
     ```
 
 
-## Enhance 3D model
+## Enhance 3D model [work in progress]
 
 ```bash
-snakemake --snakefile enhance_structure.smk --configfile config_n_crassa.yml --cores 2 --use-conda
+snakemake --snakefile enhance_structure.smk --configfile config.yml -j 4 --use-conda
 ```
 
 ## Build DAG graph
@@ -158,12 +166,12 @@ snakemake --snakefile enhance_structure.smk --configfile config_n_crassa.yml --c
 For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
 
 ```bash
-snakemake --configfile config.yml --rulegraph  | dot -Tpdf > rules.pdf
+snakemake --profile snakemake_profile --rulegraph  | dot -Tpdf > rules.pdf
 ```
 
 With wildcards:
 
 ```bash
-snakemake --configfile config.yml --dag  | dot -Tpdf > dag.pdf
+snakemake --profile snakemake_profile --dag  | dot -Tpdf > dag.pdf
 ```
 
