@@ -11,7 +11,7 @@ cd 3d-genome-builder
 
 ### Singularity
 
-Download the last version [here](https://github.com/apptainer/singularity/releases)
+Download the latest version [here](https://github.com/apptainer/singularity/releases)
 
 Install Singularity:
 
