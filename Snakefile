@@ -6,7 +6,7 @@ workdir: f"{config['workdir'].replace(' ', '_')}"
 
 rule all:
     input:
-        expand("HiCPlotter/hicplotter_{resolution}.ok", resolution=config["hicpro_resolutions"]),
+        expand("Contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
 
 
@@ -186,31 +186,6 @@ rule run_HiC_Pro_on_valid_pairs:
     shell:
         "HiC-Pro -i HiC-Pro/merged_samples -o HiC-Pro/merged_output -c {input.config} -s merge_persample -s build_contact_maps -s ice_norm"
 
-
-rule run_HiCPlotter:
-    input:
-        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
-        bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
-    output:
-        "HiCPlotter/hicplotter_{resolution}.ok"
-    message:
-        "Running HiCPlotter"
-    conda:
-        "envs/workflow.yml"
-    shell:
-        "python ../scripts/HiCPlotter.py "
-        "-f {input.matrix} "
-        "-bed {input.bed} "
-        f"-o HiCPlotter/{ORGANISM_NAME} "
-        "-r {wildcards.resolution} "
-        "-tri 1  "         # input file is from HiC-Pro pipeline
-        "-n TEST "
-        "-wg 1 "           # plotting whole genome interactions
-        "-chr chr1 "       # chromosome to be plotted
-        "-hmc 4 && "
-        "touch {output}"   # dummy output files
-
-
 rule convert_matrix_sparse_to_dense:
     input:
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
@@ -239,6 +214,19 @@ rule convert_matrix_to_numpy_array:
         "envs/workflow.yml"
     script:
         "scripts/convert_matrix_to_numpy_array.py"
+
+
+rule assemble_contact_maps:
+    input:
+        "dense_matrix/merge_{resolution}_dense.npy"
+    output:
+        "Contact_maps/contact_map_{resolution}.png"
+    message:
+        "Assembling contact maps"
+    conda:
+        "envs/workflow.yml"
+    script:
+        "scripts/assemble_contact_maps.py"
 
 
 rule create_pastis_config:
@@ -296,4 +284,4 @@ rule run_pastis_nb:
 
 rule clean:
     shell:
-        "rm -rf logs HiC-Pro dense_matrix HiCPlotter pastis"
+        "rm -rf logs HiC-Pro dense_matrix pastis"
