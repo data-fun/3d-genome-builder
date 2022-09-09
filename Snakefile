@@ -6,7 +6,7 @@ workdir: f"{config['workdir'].replace(' ', '_')}"
 
 rule all:
     input:
-        expand("Contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
+        expand("contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
 
 
@@ -218,15 +218,17 @@ rule convert_matrix_to_numpy_array:
 
 rule assemble_contact_maps:
     input:
-        "dense_matrix/merge_{resolution}_dense.npy"
+        "dense_matrix/merge_{resolution}_dense.matrix"
     output:
-        "Contact_maps/contact_map_{resolution}.png"
+        "contact_maps/contact_map_{resolution}.png"
     message:
         "Assembling contact maps"
     conda:
         "envs/workflow.yml"
-    script:
-        "scripts/assemble_contact_maps.py"
+    shell:
+        "python ../scripts/assemble_contact_maps.py "
+        "--contacts {input} "
+        "--map {output}"
 
 
 rule create_pastis_config:
