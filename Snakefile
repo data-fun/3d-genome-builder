@@ -186,6 +186,7 @@ rule run_HiC_Pro_on_valid_pairs:
     shell:
         "HiC-Pro -i HiC-Pro/merged_samples -o HiC-Pro/merged_output -c {input.config} -s merge_persample -s build_contact_maps -s ice_norm"
 
+
 rule convert_matrix_sparse_to_dense:
     input:
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
@@ -203,20 +204,7 @@ rule convert_matrix_sparse_to_dense:
         "{input.matrix} "
 
 
-rule convert_matrix_to_numpy_array:
-    input:
-        "dense_matrix/merge_{resolution}_dense.matrix"
-    output:
-        "dense_matrix/merge_{resolution}_dense.npy"
-    message:
-        "Converting matrix to numpy array"
-    conda:
-        "envs/workflow.yml"
-    script:
-        "scripts/convert_matrix_to_numpy_array.py"
-
-
-rule assemble_contact_maps:
+rule build_contact_maps:
     input:
         "dense_matrix/merge_{resolution}_dense.matrix"
     output:
@@ -226,40 +214,9 @@ rule assemble_contact_maps:
     conda:
         "envs/workflow.yml"
     shell:
-        "python ../scripts/assemble_contact_maps.py "
+        "python ../scripts/build_contact_maps.py "
         "--contacts {input} "
         "--map {output}"
-
-
-rule create_pastis_config:
-    input:
-        template="../templates/Pastis_config.template",
-        chromosome_sizes="HiC-Pro/chromosome_sizes.txt",
-        npy="dense_matrix/merge_{resolution}_dense.npy"
-    output:
-        chromosome_sizes="pastis/{resolution}/sizes.txt",
-        config="pastis/{resolution}/config.ini"
-    message:
-        "Building Pastis configuration file: {output.config}"
-    conda:
-        "envs/workflow.yml"
-    script:
-        "scripts/create_Pastis_config.py"
-
-
-rule run_pastis:
-    input:
-        chromosome_sizes="pastis/{resolution}/sizes.txt",
-        npy="dense_matrix/merge_{resolution}_dense.npy",
-        config="pastis/{resolution}/config.ini"
-    output:
-        "pastis/{resolution}/structure.pdb"
-    message:
-        "Running Pastis at resolution {wildcards.resolution}"
-    conda:
-        "envs/workflow.yml"
-    shell:
-        "pastis-pm2 pastis/{wildcards.resolution}"
 
 
 rule run_pastis_nb:
