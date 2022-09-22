@@ -150,7 +150,7 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
 
     for i, name in zip(range(len(chromosome_length)), chromosome_name):
 
-        # Select one chromosome
+        # Select the beads of one chromosome
         pdb_coordinates_chrom_x = pdb_coordinates_df[pdb_coordinates_df["residue_number"]==i+1]
         pdb_coordinates_chrom_x.reset_index(inplace=True, drop=True)
 
@@ -160,22 +160,35 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
                                                 +(np.diff(np.array(pdb_coordinates_chrom_x["z_coord"]), axis=0))**2)
         Euclydian_distances_after = np.append(Euclydian_distances_after, [0])
 
+        # Print mean and standard deviation of distances
+        print("mean distance between beads : "+str(np.mean(Euclydian_distances_after)))
+        print("Standard deviation of distances between beads : "+str(np.std(Euclydian_distances_after)))
+
         # Get chromosome ATCG sequence
         chromosome_sequence = str(genome_fasta[name].seq)
 
-        # Select extremities of inverted contigs, i.e. beads further than 3*mean(distances) from the next bead.
+        # Select extremities of inverted contigs, i.e. beads further than 3*mean(distances) from the next bead (arbitrary)
         pdb_coordinates_chrom_x = pdb_coordinates_chrom_x.assign(distance = Euclydian_distances_after)
         flipping_limits = pdb_coordinates_chrom_x["distance"]>3*np.mean(pdb_coordinates_chrom_x["distance"])
         flipping_limits_index = list(pdb_coordinates_chrom_x[flipping_limits].index)
 
+        # TO DO kill script if odd number of flipping_limits_index
+
+        # Print number of inverted contigs, half the number of extremities
+        print("number of inverted contigs : "+len(flipping_limits_index)/2)
+        
         # Correct the beads order in the PDB and the bases order in the FASTA
         if flipping_limits_index != []:
             for j in range(0, len(flipping_limits_index), 2):
+
+                # The beads inside an inverted contig are between a first extremity bead (excluded) and the next extremity bead (included)
+                # The left extremity is excluded and the right one included because we look at the distance between the n and n+1 bead.
+                print("Detected inverted contig between bead n°"+str(flipping_limits_index[j]+1)+" and bead n°"+str(flipping_limits_index[j+1]))
                 
-                # Flip the atoms corresponding to the inverted contigs
-                print("Flipping atoms n°"+str(flipping_limits_index[j]+1)+" to n°"+str(flipping_limits_index[j+1]))
-                flipped_atoms = pdb_coordinates_chrom_x.loc[flipping_limits_index[j]+1:flipping_limits_index[j+1],][::-1]
-                pdb_coordinates_chrom_x = pd.concat([pdb_coordinates_chrom_x.iloc[:flipping_limits_index[j]+1,:], flipped_atoms.iloc[:,], pdb_coordinates_chrom_x.iloc[flipping_limits_index[j+1]+1:,]], axis=0)
+                # Flip the beads corresponding to the inverted contigs
+                print("Flipping beads n°"+str(flipping_limits_index[j]+1)+" to n°"+str(flipping_limits_index[j+1]))
+                flipped_beads = pdb_coordinates_chrom_x.loc[flipping_limits_index[j]+1:flipping_limits_index[j+1],][::-1]
+                pdb_coordinates_chrom_x = pd.concat([pdb_coordinates_chrom_x.iloc[:flipping_limits_index[j]+1,:], flipped_beads.iloc[:,], pdb_coordinates_chrom_x.iloc[flipping_limits_index[j+1]+1:,]], axis=0)
                 
                 # Flip the bases corresponding th the inverted contigs
                 print("Flipping bases n°"+str((flipping_limits_index[j]+1)*HiC_resolution)+" to n°"+str((flipping_limits_index[j+1]+1)*HiC_resolution))
