@@ -78,7 +78,7 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
             "z_coord"
         ].to_numpy()
         missing_beads_index = chromosome.loc[
-            chromosome[["x_coord", "y_coord", "z_coord"]].isna().any(1)
+            chromosome[["x_coord", "y_coord", "z_coord"]].isna().any(axis=1)
         ].index.to_numpy()
         # Build models for each chromosome and each coordinate
         interpolate_x = PchipInterpolator(beads_index, beads_x)
