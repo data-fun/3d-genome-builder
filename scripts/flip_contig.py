@@ -1,19 +1,22 @@
-"""Modify a PDB file containing a 3D genome structure to flip inverted contigs. The corrected sequence (at the 3D structure resolution!) is saved in a new fasta file.
+"""Detect flipped contig from a PDB file containing a 3D genome structure.
 
-It requires:
-- a PDB file containing the genome structure,
+Fix -- reinvert the flipped part of the genome -- in the 3D structure and the sequence.
+
+This script requires:
+- a PDB file containing the 3D genome structure,
 - a fasta file containing the genome sequence,
-- a resolution.
+- an Hi-C resolution.
 """
 
 import argparse
 import math
-import numpy as np
-import pandas as pd
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
 from Bio.Seq import Seq
+import numpy as np
+import pandas as pd
+
 
 def get_cli_arguments():
     """Command line argument parser.
@@ -25,7 +28,6 @@ def get_cli_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
         "--pdb",
         action="store",
         type=str,
@@ -33,7 +35,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
         "--fasta",
         action="store",
         type=str,
@@ -41,7 +42,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-r",
         "--resolution",
         action="store",
         type=int,
@@ -49,26 +49,24 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-o_pdb",
-        "--output_pdb",
+        "--output-pdb",
         action="store",
         type=str,
-        help="Output PDB file containing the annotated 3D structure of the genome",
+        help="Output PDB file containing the fixed 3D structure of the genome",
         required=True,
     )
     parser.add_argument(
-        "-o_fasta",
-        "--output_fasta",
+        "--output-fasta",
         action="store",
         type=str,
-        help="Output FASTA file containing the corrected sequence of the genome",
+        help="Output FASTA file containing the fixed sequence of the genome",
         required=True,
     )
     return parser.parse_args()
 
 
-def extract_chromosome_length(fasta_name):
-    """Extract chromosome length from a FASTA file.
+def extract_chromosome_name_length(fasta_name):
+    """Extract chromosome name and length from a FASTA file.
 
     Parameters
     ----------
@@ -77,43 +75,83 @@ def extract_chromosome_length(fasta_name):
     
     Returns
     -------
-    list
+    tuple
+        List of chromosome names
         List of chromosome lengthes
     """
+    chromosome_name_lst = []
     chromosome_length_lst = []
     with open(fasta_name, "r") as fasta_file:
         print(f"Reading {fasta_name}")
         for record in SeqIO.parse(fasta_file, "fasta"):
+            name = record.id
             length = len(record.seq)
-            print(f"Found chromosome {record.id} with {length} bases")
+            print(f"Found chromosome {name} with {length} bases")
+            chromosome_name_lst.append(name)
             chromosome_length_lst.append(length)
-    return chromosome_length_lst
+    return chromosome_name_lst, chromosome_length_lst
 
 
-def extract_chromosome_name(fasta_name):
-    """Extract chromosome name from a FASTA file.
+
+def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta_name, HiC_resolution):
+    """Detect inverted contigs.
+
+    It uses the eucledian distance between adjacent beads in the 3D structure of the genome.
 
     Parameters
     ----------
+    pdb_name_in : str
+        PDB file containing the 3D structure of the genome
+    chromosome_length : list
+        List with chromosome lengths
+    chromosome_name : list
+        List with chromosome names
     fasta_name : str
         Name of Fasta file containing the sequence of the genome
-    
-    Returns
-    -------
-    list
-        List of chromosome names
+    HiC_resolution : int
+        HiC resolution
     """
-    chromosome_name_lst = []
-    with open(fasta_name, "r") as fasta_file:
-        print(f"Reading {fasta_name}")
-        for record in SeqIO.parse(fasta_file, "fasta"):
-            name = record.id
-            chromosome_name_lst.append(name)
-    return chromosome_name_lst
+    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
+    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
+
+    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
+    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+    
+    coordinates = pdb_coordinates.df["ATOM"]
+
+    inverted_contigs = {}
+
+    for chrom_index in coordinates["residue_number"].unique():
+        print(f"Finding inverted contigs for chromosome {chrom_index}")
+        
+        # Select beads of one chromosome
+        chrom_coordinates = coordinates.query(f"residue_number == {chrom_index}").reset_index(drop=True)
+                
+        # Compute Euclidean distances between bead n+1 and bead n
+        euclidean_distances = np.sqrt( (np.diff(np.array(chrom_coordinates["x_coord"]), axis=0))**2
+                                            +(np.diff(np.array(chrom_coordinates["y_coord"]), axis=0))**2
+                                            +(np.diff(np.array(chrom_coordinates["z_coord"]), axis=0))**2
+                                            )
+        euclidean_distances = np.append(euclidean_distances, [0])
+
+        mean_distance = np.mean(euclidean_distances)
+        print(f"Mean distance between beads: {mean_distance:.2f}")
+        print(f"Standard deviation of distances between beads: {np.std(euclidean_distances):.2f}")
+        
+        # Select extremities of inverted contigs
+        # i.e. beads with distance beyond a given threshold of 3*mean(distances)
+        chrom_coordinates = chrom_coordinates.assign(distance = euclidean_distances)
+        beads_selection = chrom_coordinates["distance"]>3*mean_distance
+        inversion_limits = chrom_coordinates.loc[beads_selection , "atom_number"].values
+        print(inversion_limits)
+        if len(inversion_limits)%2 != 0:
+            print("WARNING: odd number of inversion limits found")
+
+        inverted_contigs[chrom_index] = inversion_limits
 
 
-def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_name, HiC_resolution, pdb_name_out, fasta_name_out):
-    """Flip contigs inverted in the genome assembly according to the Euclidian distances between beads in the 3D genome structure.
+def flip_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta_name, HiC_resolution, pdb_name_out, fasta_name_out):
+    """Flip contigs inverted in the genome assemblyaccording to the Euclidian distances between beads in the 3D genome structure.
 
     Note:
     - The PDB file produced by Pastis is not readable by Biopython
@@ -213,11 +251,11 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
-
-    # Read Fasta file and get chromosome length
-    CHROMOSOME_LENGTH = extract_chromosome_length(ARGS.fasta)
-    CHROMOSOME_NAME = extract_chromosome_name(ARGS.fasta)
+    print(ARGS)
+    # Read Fasta file and extract chromosome name and length
+    CHROMOSOME_NAME, CHROMOSOME_LENGTH = extract_chromosome_name_length(ARGS.fasta)
 
     # Assign chromosome number
-    flip_inverted_contig(ARGS.pdb, CHROMOSOME_LENGTH, CHROMOSOME_NAME, ARGS.fasta, ARGS.resolution, ARGS.output_pdb, ARGS.output_fasta)
+    find_inverted_contigs(ARGS.pdb, CHROMOSOME_LENGTH, CHROMOSOME_NAME, ARGS.fasta, ARGS.resolution)
+    flip_inverted_contigs(ARGS.pdb, CHROMOSOME_LENGTH, CHROMOSOME_NAME, ARGS.fasta, ARGS.resolution, ARGS.output_pdb, ARGS.output_fasta)
 
