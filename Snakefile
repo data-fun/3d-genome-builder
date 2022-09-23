@@ -8,6 +8,8 @@ rule all:
     input:
         expand("contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_with_chr.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_completed.pdb", resolution=config["pastis_resolutions"]),
 
 
 # fasterq-dump documentation:
@@ -239,6 +241,39 @@ rule run_pastis_nb:
         "--bed {input.bed} "
         "--output {output} "
         ">{log} 2>&1 "
+
+
+rule assign_chromosomes:
+    input:
+        structure="pastis/structure_{resolution}.pdb",
+        sequence="genome.fasta"
+    output:
+        "structure/{resolution}/structure_with_chr.pdb"
+    message:
+        "Assigning chromosomes to the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/assign_chromosomes.py "
+        "--pdb {input.structure} "
+        "--fasta {input.sequence} "
+        "--resolution {wildcards.resolution} "
+        "--output {output}"
+        
+
+rule interpolate_missing_coordinates:
+    input:
+        "structure/{resolution}/structure_with_chr.pdb"
+    output:
+        "structure/{resolution}/structure_completed.pdb"
+    message:
+        "Fixing missing coordinates in the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/interpolate_missing_coordinates.py "
+        "--pdb {input} "
+        "--output {output}"
 
 
 rule clean:

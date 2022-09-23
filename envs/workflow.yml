@@ -8,6 +8,9 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
+  - scipy
+  - matplotlib
+  - pandas
   # fasterq-dump
   - sra-tools
   # pigz: parallel implementation of gzip
@@ -16,9 +19,6 @@ dependencies:
   - biopython
   # Create HiC-Pro config file with template
   - jinja2
-  # HiCPlotter dependencies
-  - scipy
-  - matplotlib
   # Pastis config file
   - pandas
   # Pastis
@@ -26,6 +26,10 @@ dependencies:
   # Iced: https://github.com/hiclib/iced
   # https://pypi.org/project/iced/
   - iced
+  # Python library to read fasta files
+  - biopython
+  # Python library to read pdb files
+  - biopandas
   - pip:
     # https://github.com/hiclib/pastis
     # https://pypi.org/project/pastis/

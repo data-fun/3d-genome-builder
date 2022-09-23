@@ -26,12 +26,6 @@ $ singularity --version
 singularity version 3.8.7
 ```
 
-### HiCPlotter
-
-```bash
-wget https://gitee.com/simonjyoung/HiCPlotter/raw/master/HiCPlotter.py -P scripts
-```
-
 ### Conda environment
 
 Install [conda](https://docs.conda.io/en/latest/miniconda.html).
@@ -153,13 +147,6 @@ Depending on the number and size of fastq files, the 3D construction will take a
     ```bash
     snakemake --profile snakemake_profile -j 4
     ```
-
-
-## Enhance 3D model [work in progress]
-
-```bash
-snakemake --snakefile enhance_structure.smk --configfile config.yml -j 4 --use-conda
-```
 
 ## Build DAG graph
 
