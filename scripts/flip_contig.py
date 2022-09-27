@@ -122,6 +122,9 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
 
     beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
     print(f"Number of expected beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+
+    if coordinates.shape[0] != sum(beads_per_chromosome):
+        sys.exit(f"Cannot process structure {pdb_name_in} because it contains {coordinates.shape[0]} beads instead of {sum(beads_per_chromosome)}")
     
     inverted_contigs = {}
 
