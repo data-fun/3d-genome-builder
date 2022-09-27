@@ -1,6 +1,6 @@
-"""Detect flipped contig from a PDB file containing a 3D genome structure.
+"""Detect flipped contigs from a PDB file containing a 3D genome structure.
 
-Fix -- reinvert the flipped part of the genome -- in the 3D structure and the sequence.
+Invert the flipped part of the genome in the 3D structure and the sequence.
 
 This script requires:
 - a PDB file containing the 3D genome structure,
