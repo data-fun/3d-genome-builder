@@ -10,6 +10,7 @@ This script requires:
 
 import argparse
 import math
+import sys
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
@@ -111,18 +112,21 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
     HiC_resolution : int
         HiC resolution
     """
-    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
-    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
+    pdb_structure = PandasPdb().read_pdb(pdb_name_in)
+    coordinates = pdb_structure.df["ATOM"]
+    print(f"Number of beads read from structure: {coordinates.shape[0]}")
+
+    if coordinates["residue_number"].isna().sum() > 0:
+        print(coordinates["residue_number"].isna().sum())
+        sys.exit(f"Cannot process structure {pdb_name_in} because it contains missing residue numbers (chromosomes)")
 
     beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+    print(f"Number of expected beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
     
-    coordinates = pdb_coordinates.df["ATOM"]
-
     inverted_contigs = {}
 
     for chrom_index in coordinates["residue_number"].unique():
-        print(f"Finding inverted contigs for chromosome {chrom_index}")
+        print(f"Looking for inverted contigs into chromosome {chrom_index}")
         
         # Select beads of one chromosome
         chrom_coordinates = coordinates.query(f"residue_number == {chrom_index}").reset_index(drop=True)
@@ -139,9 +143,10 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
         print(f"Standard deviation of distances between beads: {np.std(euclidean_distances):.2f}")
         
         # Select extremities of inverted contigs
-        # i.e. beads with distance beyond a given threshold of 3*mean(distances)
+        # i.e. beads with distance above a given threshold of 3*mean(distances)
         chrom_coordinates = chrom_coordinates.assign(distance = euclidean_distances)
         beads_selection = chrom_coordinates["distance"]>3*mean_distance
+        print(sum(beads_selection))
         inversion_limits = chrom_coordinates.loc[beads_selection , "atom_number"].values
         print(inversion_limits)
         if len(inversion_limits)%2 != 0:
