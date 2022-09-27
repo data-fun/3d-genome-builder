@@ -175,7 +175,7 @@ def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_
         # TO DO kill script if odd number of flipping_limits_index
 
         # Print number of inverted contigs, half the number of extremities
-        print("number of inverted contigs : "+len(flipping_limits_index)/2)
+        #print("number of inverted contigs : "+len(flipping_limits_index)/2)
         
         # Correct the beads order in the PDB and the bases order in the FASTA
         if flipping_limits_index != []:
