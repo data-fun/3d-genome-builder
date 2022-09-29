@@ -129,7 +129,7 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
     inverted_contigs = {}
 
     for chrom_index in coordinates["residue_number"].unique():
-        print(f"Looking for inverted contigs into chromosome {chrom_index}")
+        print(f"\nLooking for inverted contigs into chromosome {chrom_index}")
         
         # Select beads of one chromosome
         chrom_coordinates = coordinates.query(f"residue_number == {chrom_index}").reset_index(drop=True)
@@ -148,14 +148,20 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
         # Select extremities of inverted contigs
         # i.e. beads with distance above a given threshold of 3*mean(distances)
         chrom_coordinates = chrom_coordinates.assign(distance = euclidean_distances)
+        # Output beads coordinates with distance
+        chrom_coordinates.to_csv(f"chr_{chrom_index}.tsv", sep="\t", index=False)
         beads_selection = chrom_coordinates["distance"]>3*mean_distance
-        print(sum(beads_selection))
         inversion_limits = chrom_coordinates.loc[beads_selection , "atom_number"].values
-        print(inversion_limits)
         if len(inversion_limits)%2 != 0:
             print("WARNING: odd number of inversion limits found")
-
-        inverted_contigs[chrom_index] = inversion_limits
+            print(inversion_limits)
+        if len(inversion_limits) != 0:
+            for limit_1, limit_2 in zip(inversion_limits[0::2], inversion_limits[1::2]):
+                print(f"Chromosome {chrom_index}: found inverted contig between bead {limit_1+1} and bead {limit_2}")
+                if chrom_index in inverted_contigs:
+                    inverted_contigs[chrom_index].append((limit_1+1, limit_2))
+                else:
+                    inverted_contigs[chrom_index] = [(limit_1+1, limit_2)]
 
 
 def flip_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta_name, HiC_resolution, pdb_name_out, fasta_name_out):
@@ -259,7 +265,7 @@ def flip_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
-    print(ARGS)
+
     # Read Fasta file and extract chromosome name and length
     CHROMOSOME_NAME, CHROMOSOME_LENGTH = extract_chromosome_name_length(ARGS.fasta)
 
