@@ -154,6 +154,7 @@ def find_inverted_contigs(pdb_name_in, chromosome_length, chromosome_name, fasta
         inversion_limits = chrom_coordinates.loc[beads_selection , "atom_number"].values
         if len(inversion_limits)%2 != 0:
             print("WARNING: odd number of inversion limits found")
+            print("WARNING: this might lead to a wrong detection of inverted contigs")
             print(inversion_limits)
         if len(inversion_limits) != 0:
             for limit_1, limit_2 in zip(inversion_limits[0::2], inversion_limits[1::2]):
