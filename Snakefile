@@ -223,9 +223,9 @@ rule build_contact_maps:
 
 rule run_pastis_nb:
     input:
-        #matrix="dense_matrix/merge_{resolution}_dense.matrix",
+        matrix="dense_matrix/merge_{resolution}_dense.matrix",
         #matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
-        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix",
+        #matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix",
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
     output:
         "pastis/structure_{resolution}.pdb"
