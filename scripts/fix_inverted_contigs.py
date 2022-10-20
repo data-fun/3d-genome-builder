@@ -4,8 +4,8 @@ Flip inverted contigs in the 3D structure and in the sequence of the genome.
 
 This script requires:
 - a PDB file containing the 3D genome structure,
-- a fasta file containing the genome sequence,
-- an Hi-C resolution.
+- a FASTA file containing the genome sequence,
+- the HiC resolution from which the structure has been generated.
 """
 
 import argparse
@@ -27,56 +27,66 @@ def get_cli_arguments():
     argparse.Namespace
         Object containing arguments
     """
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
+    parser = argparse.ArgumentParser(add_help=False)
+    required = parser.add_argument_group('required arguments')
+    optional = parser.add_argument_group('optional arguments')
+    required.add_argument(
         "--pdb",
         action="store",
         type=str,
-        help="PDB file containing the 3D structure of the genome",
+        help="PDB file containing the 3D structure of the genome.",
         required=True,
     )
-    parser.add_argument(
+    required.add_argument(
         "--fasta",
         action="store",
         type=str,
-        help="Fasta file containing the sequence of the genome",
+        help="Fasta file containing the sequence of the genome.",
         required=True,
     )
-    parser.add_argument(
+    required.add_argument(
         "--resolution",
         action="store",
         type=int,
-        help="HiC resolution",
+        help="HiC resolution from which the structure has been generated.",
         required=True,
     )
-    parser.add_argument(
+    required.add_argument(
         "--output-pdb",
         action="store",
         type=str,
-        help="Output PDB file containing the fixed 3D structure of the genome",
+        help="Output PDB file containing the fixed 3D structure of the genome.",
         required=True,
     )
-    parser.add_argument(
+    required.add_argument(
         "--output-fasta",
         action="store",
         type=str,
-        help="Output FASTA file containing the fixed sequence of the genome",
+        help="Output FASTA file containing the fixed sequence of the genome.",
         required=True,
     )
-    parser.add_argument(
+    optional.add_argument(
         "--threshold",
         action="store",
         type=float,
-        help="Threshold to detect flipped contigs",
+        help="Distance threshold to detect flipped contigs. Default: 3",
         required=False,
         default=3.0,
     )
-    parser.add_argument(
+    optional.add_argument(
         "--debug",
         action="store_true",
         help="Debug flag. Output one TSV file per chromosome with bead distances.",
         required=False,
         default=False,
+    )
+    # Add help.
+    optional.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        default=argparse.SUPPRESS,
+        help="Show this help message and exit."
     )
     return parser.parse_args()
 
@@ -87,13 +97,13 @@ def extract_chromosome_name_length(fasta_name):
     Parameters
     ----------
     fasta_name : str
-        Name of Fasta file containing the sequence of the genome
+        Name of the FASTA file containing the sequence of the genome.
 
     Returns
     -------
     tuple
-        List of chromosome names
-        List of chromosome lengthes
+        List of chromosome names.
+        List of chromosome lengthes.
     """
     chromosome_name_lst = []
     chromosome_length_lst = []
@@ -133,23 +143,24 @@ def compute_bead_distances(atom_array):
 def find_inverted_contigs(pdb_name_in, chromosome_lengths, HiC_resolution, threshold):
     """Find inverted contigs.
 
-    Inverted contigs are detected based on the eucledian distance between adjacent beads in the 3D structure of the genome.
+    Inverted contigs are detected based on the eucledian distance 
+    between adjacent beads in the 3D structure of the genome.
 
     Parameters
     ----------
     pdb_name_in : str
-        PDB file containing the 3D structure of the genome
+        PDB file containing the 3D structure of the genome.
     chromosome_lengths : list
-        List with chromosome lengths
+        List with chromosome lengths.
     HiC_resolution : int
-        HiC resolution
+        HiC resolution.
     threshold : float
-        Threshold to detect flipped contigs
+        Threshold to detect flipped contigs.
 
     Returns
     -------
     inverted_contigs : dict
-        Dictionnary with inverted contigs
+        Dictionnary with inverted contigs.
     """
     pdb_structure = PandasPdb().read_pdb(pdb_name_in)
     structure_df = pdb_structure.df["ATOM"]
@@ -271,15 +282,15 @@ def flip_inverted_contigs_in_sequence(
     Parameters
     ----------
     inverted_contigs : dict
-        Dictionnary with inverted contigs
+        Dictionnary with inverted contigs.
     chromosome_names : list
-        List with chromosome names
+        List with chromosome names.
     fasta_name_in : str
-        Name of Fasta file containing the sequence of the genome
+        Name of Fasta file containing the sequence of the genome.
     HiC_resolution : int
-        HiC resolution
+        HiC resolution.
     fasta_name_out : str
-        Output FASTA file containing the corrected sequence (at the 3D structure resolution!)
+        Output FASTA file containing the fixed sequence (at the 3D structure resolution!).
     """
     # Flip inverted contigs in the genome sequence.
     genome_fasta = SeqIO.to_dict(SeqIO.parse(fasta_name_in, "fasta"))
