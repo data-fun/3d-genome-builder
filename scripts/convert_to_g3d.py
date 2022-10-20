@@ -132,11 +132,11 @@ def convert_to_g3d(
         bp_coordinates = bp_coordinates + bp_coordinates_chrom_x
 
     # Extract chromosomes and 3d coordinates information
-    g3d_data = { 'chromosomes': pdb_coordinates.df["ATOM"]["residue_number"],
+    g3d_data = { 'chrom': pdb_coordinates.df["ATOM"]["residue_number"],
                 'locus':bp_coordinates,
-                'x_coord': pdb_coordinates.df["ATOM"]["x_coord"],
-                'y_coord': pdb_coordinates.df["ATOM"]["y_coord"],
-                'z_coord': pdb_coordinates.df["ATOM"]["z_coord"] }
+                'X3D_x': pdb_coordinates.df["ATOM"]["x_coord"],
+                'X3D_y': pdb_coordinates.df["ATOM"]["y_coord"],
+                'X3D_z': pdb_coordinates.df["ATOM"]["z_coord"] }
     result = pd.DataFrame(g3d_data)
 
     #save as g3d file
