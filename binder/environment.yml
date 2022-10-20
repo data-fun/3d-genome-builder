@@ -8,17 +8,26 @@ channels:
   - conda-forge
 dependencies:
   - python=3.9
+  # Data analysis
+  - pandas
+  - scipy
+  - matplotlib
+  - jupyterlab
+  # Snakemake
   - snakemake-minimal
   # Build DAG with Snakemake
   - graphviz
-  # Code cleaning
+  # Code formating
   - black
+  - flake8
+  - pydocstyle
   # FASTQ file manipulation
   # https://anaconda.org/bioconda/seqkit
   # https://bioinf.shenwei.me/seqkit/
   - seqkit
-  # Fasta and PDB files manipulation
+  # FASTA files manipulation
   - biopython
+  # PDB files manipulation
   - biopandas
 
 
