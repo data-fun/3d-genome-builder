@@ -1,19 +1,23 @@
-"""Modify a PDB file containing a 3D genome structure to flip inverted contigs. The corrected sequence (at the 3D structure resolution!) is saved in a new fasta file.
+"""Detect inverted contigs from a PDB file containing a 3D genome structure.
 
-It requires:
-- a PDB file containing the genome structure,
+Flip inverted contigs in the 3D structure and in the sequence of the genome.
+
+This script requires:
+- a PDB file containing the 3D genome structure,
 - a fasta file containing the genome sequence,
-- a resolution.
+- an Hi-C resolution.
 """
 
 import argparse
 import math
+import sys
+
+from Bio import SeqIO
+from Bio.Seq import Seq
+from biopandas.pdb import PandasPdb
 import numpy as np
 import pandas as pd
 
-from Bio import SeqIO
-from biopandas.pdb import PandasPdb
-from Bio.Seq import Seq
 
 def get_cli_arguments():
     """Command line argument parser.
@@ -25,7 +29,6 @@ def get_cli_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
         "--pdb",
         action="store",
         type=str,
@@ -33,7 +36,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
         "--fasta",
         action="store",
         type=str,
@@ -41,7 +43,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-r",
         "--resolution",
         action="store",
         type=int,
@@ -49,175 +50,289 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-o_pdb",
-        "--output_pdb",
+        "--output-pdb",
         action="store",
         type=str,
-        help="Output PDB file containing the annotated 3D structure of the genome",
+        help="Output PDB file containing the fixed 3D structure of the genome",
         required=True,
     )
     parser.add_argument(
-        "-o_fasta",
-        "--output_fasta",
+        "--output-fasta",
         action="store",
         type=str,
-        help="Output FASTA file containing the corrected sequence of the genome",
+        help="Output FASTA file containing the fixed sequence of the genome",
         required=True,
+    )
+    parser.add_argument(
+        "--threshold",
+        action="store",
+        type=float,
+        help="Threshold to detect flipped contigs",
+        required=False,
+        default=3.0,
+    )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Debug flag. Output one TSV file per chromosome with bead distances.",
+        required=False,
+        default=False,
     )
     return parser.parse_args()
 
 
-def extract_chromosome_length(fasta_name):
-    """Extract chromosome length from a FASTA file.
+def extract_chromosome_name_length(fasta_name):
+    """Extract chromosome name and length from a FASTA file.
 
     Parameters
     ----------
     fasta_name : str
         Name of Fasta file containing the sequence of the genome
-    
+
     Returns
     -------
-    list
+    tuple
+        List of chromosome names
         List of chromosome lengthes
     """
+    chromosome_name_lst = []
     chromosome_length_lst = []
     with open(fasta_name, "r") as fasta_file:
         print(f"Reading {fasta_name}")
         for record in SeqIO.parse(fasta_file, "fasta"):
+            name = record.id
             length = len(record.seq)
-            print(f"Found chromosome {record.id} with {length} bases")
+            print(f"Found chromosome {name} with {length} bases")
+            chromosome_name_lst.append(name)
             chromosome_length_lst.append(length)
-    return chromosome_length_lst
+    return chromosome_name_lst, chromosome_length_lst
 
 
-def extract_chromosome_name(fasta_name):
-    """Extract chromosome name from a FASTA file.
+def compute_bead_distances(atom_array):
+    """Compute distance between beads.
 
     Parameters
     ----------
-    fasta_name : str
-        Name of Fasta file containing the sequence of the genome
-    
+    atom_array : numpy.ndarray
+        Array containing beads coordinates. Array dimensions are (n, 3).
+
     Returns
     -------
-    list
-        List of chromosome names
+    numpy.ndarray
+        Distance between beads as 1D-array.
     """
-    chromosome_name_lst = []
-    with open(fasta_name, "r") as fasta_file:
-        print(f"Reading {fasta_name}")
-        for record in SeqIO.parse(fasta_file, "fasta"):
-            name = record.id
-            chromosome_name_lst.append(name)
-    return chromosome_name_lst
+    distances = np.sqrt(
+        (np.diff(atom_array[:, 0], axis=0)) ** 2
+        + (np.diff(atom_array[:, 1], axis=0)) ** 2
+        + (np.diff(atom_array[:, 2], axis=0)) ** 2
+    )
+    distances = np.append(distances, [0])
+    return distances
 
 
-def flip_inverted_contig(pdb_name_in, chromosome_length, chromosome_name, fasta_name, HiC_resolution, pdb_name_out, fasta_name_out):
-    """Flip contigs inverted in the genome assembly according to the Euclidian distances between beads in the 3D genome structure.
+def find_inverted_contigs(pdb_name_in, chromosome_lengths, HiC_resolution, threshold):
+    """Find inverted contigs.
 
-    Note:
-    - The PDB file produced by Pastis is not readable by Biopython
-    because the residue number column is missing.
-    - We use instead the biopandas library. http://rasbt.github.io/biopandas/
+    Inverted contigs are detected based on the eucledian distance between adjacent beads in the 3D structure of the genome.
 
     Parameters
     ----------
     pdb_name_in : str
         PDB file containing the 3D structure of the genome
-    chromosome_length : list
+    chromosome_lengths : list
         List with chromosome lengths
-    chromosome_name : list
+    HiC_resolution : int
+        HiC resolution
+    threshold : float
+        Threshold to detect flipped contigs
+
+    Returns
+    -------
+    inverted_contigs : dict
+        Dictionnary with inverted contigs
+    """
+    pdb_structure = PandasPdb().read_pdb(pdb_name_in)
+    structure_df = pdb_structure.df["ATOM"]
+    print(f"Number of beads read from structure: {structure_df.shape[0]}")
+
+    if structure_df["residue_number"].isna().sum() > 0:
+        print(structure_df["residue_number"].isna().sum())
+        sys.exit(
+            f"Cannot process structure {pdb_name_in} because it contains missing residue numbers (chromosomes)"
+        )
+
+    beads_per_chromosome = [
+        math.ceil(length / HiC_resolution) for length in chromosome_lengths
+    ]
+    print(
+        f"Number of expected beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}"
+    )
+
+    if structure_df.shape[0] != sum(beads_per_chromosome):
+        sys.exit(
+            f"Cannot process structure {pdb_name_in} because it contains {structure_df.shape[0]} beads instead of {sum(beads_per_chromosome)}"
+        )
+
+    inverted_contigs = {}
+
+    for chrom_num in structure_df["residue_number"].unique():
+        print(f"\nLooking for inverted contigs into chromosome {chrom_num}")
+
+        # Select beads of one chromosome
+        chromosome_df = structure_df.query(
+            f"residue_number == {chrom_num}"
+        ).reset_index(drop=True)
+
+        # Compute Euclidean distances between bead n and bead n+1
+        coordinates = chromosome_df[["x_coord", "y_coord", "z_coord"]].to_numpy()
+        euclidean_distances = compute_bead_distances(coordinates)
+        median_distance = np.median(euclidean_distances)
+        print(f"Median distance between beads: {median_distance:.2f}")
+
+        # Select extremities of inverted contigs
+        # i.e. beads with distance above a given threshold.
+        # Output beads coordinates with distances
+        if ARGS.debug:
+            filename = f"chr_{chrom_num}.tsv"
+            print(f"DEBUG: writing {filename} with distances.")
+            chromosome_df.to_csv(filename, sep="\t", index=False)
+        chromosome_df = chromosome_df.assign(distance=euclidean_distances)
+        beads_selection = chromosome_df["distance"] > threshold * median_distance
+        inversion_limits = chromosome_df.loc[beads_selection, "atom_number"].values
+        if len(inversion_limits) % 2 != 0:
+            print("WARNING: odd number of inversion limits found")
+            print("WARNING: this might lead to a wrong detection of inverted contigs")
+            print(inversion_limits)
+        if len(inversion_limits) != 0:
+            for limit_1, limit_2 in zip(inversion_limits[0::2], inversion_limits[1::2]):
+                print(
+                    f"Chromosome {chrom_num}: found inverted contig between bead {limit_1+1} and bead {limit_2}"
+                )
+                if chrom_num in inverted_contigs:
+                    inverted_contigs[chrom_num].append((limit_1 + 1, limit_2))
+                else:
+                    inverted_contigs[chrom_num] = [(limit_1 + 1, limit_2)]
+        else:
+            inverted_contigs[chrom_num] = []
+    return inverted_contigs
+
+
+def flip_inverted_contigs_in_structure(inverted_contigs, pdb_name_in, pdb_name_out):
+    """Flip inverted contigs in the 3D structure of the genome.
+
+    Parameters
+    ----------
+    inverted_contigs : dict
+        Dictionnary with inverted contigs
+    pdb_name_in : str
+        PDB file containing the 3D structure of the genome
+    pdb_name_out : str
+        Output PDB file containing the 3D structure of the genome
+    """
+    pdb_structure = PandasPdb().read_pdb(pdb_name_in)
+    coordinates = pdb_structure.df["ATOM"]
+    print("\nFlipping contigs.")
+    for chrom_num in inverted_contigs:
+        for contig in inverted_contigs[chrom_num]:
+            contig_start, contig_end = contig
+            print(
+                f"Structure of chromosome {chrom_num}: "
+                f"flip contig between beads {contig_start} "
+                f"and {contig_end}"
+            )
+            contig_start_index = coordinates[
+                (coordinates["residue_number"] == chrom_num)
+                & (coordinates["atom_number"] == contig_start)
+            ].index[0]
+            contig_end_index = coordinates[
+                (coordinates["residue_number"] == chrom_num)
+                & (coordinates["atom_number"] == contig_end)
+            ].index[0]
+            contig_before_df = coordinates.loc[: contig_start_index - 1, :]
+            contig_df = coordinates.loc[contig_start_index:contig_end_index, :]
+            contig_after_df = coordinates.loc[contig_end_index + 1 :, :]
+            # Flip contig.
+            contig_df = contig_df[::-1]
+            # Assemble genome structure.
+            coordinates = pd.concat([contig_before_df, contig_df, contig_after_df])
+
+    coordinates = coordinates.reset_index(drop=True)
+    # The 'line_idx' column keeps the real order of atoms in the PDB file.
+    coordinates["line_idx"] = coordinates.index
+    pdb_structure.df["ATOM"] = coordinates
+    pdb_structure.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
+
+
+def flip_inverted_contigs_in_sequence(
+    inverted_contigs, chromosome_names, fasta_name_in, HiC_resolution, fasta_name_out
+):
+    """Flip inverted contigs in the genome 3D structure and sequence.
+
+    Parameters
+    ----------
+    inverted_contigs : dict
+        Dictionnary with inverted contigs
+    chromosome_names : list
         List with chromosome names
-    fasta_name : str
+    fasta_name_in : str
         Name of Fasta file containing the sequence of the genome
     HiC_resolution : int
         HiC resolution
-    pdb_name_out : str
-        Output PDB file containing the 3D structure of the genome
     fasta_name_out : str
         Output FASTA file containing the corrected sequence (at the 3D structure resolution!)
     """
-    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
-    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
+    # Flip inverted contigs in the genome sequence.
+    genome_fasta = SeqIO.to_dict(SeqIO.parse(fasta_name_in, "fasta"))
 
-    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
-    
-    pdb_coordinates_df = pdb_coordinates.df["ATOM"]
-    pdb_coordinates_df_output = pd.DataFrame()
+    for chrom_num in inverted_contigs:
+        chrom_name = chromosome_names[chrom_num - 1]
+        chrom_sequence = str(genome_fasta[chrom_name].seq)
+        for contig in inverted_contigs[chrom_num]:
+            contig_start = contig[0] * HiC_resolution
+            contig_end = contig[1] * HiC_resolution
+            print(
+                f"Sequence of chromosome {chrom_num}: "
+                f"flip inverted contig between base {contig_start} "
+                f"and {contig_end}"
+            )
+            contig_sequence = chrom_sequence[contig_start : contig_end + 1]
+            # Flip contig.
+            contig_sequence = contig_sequence[::-1]
+            # Reassemble chromosome sequence.
+            chrom_sequence = (
+                chrom_sequence[:contig_start]
+                + contig_sequence
+                + chrom_sequence[contig_end + 1 :]
+            )
+        genome_fasta[chrom_name].seq = Seq(chrom_sequence)
 
-    genome_fasta = SeqIO.to_dict(SeqIO.parse(fasta_name, "fasta"))
-
-    for i, name in zip(range(len(chromosome_length)), chromosome_name):
-
-        # Select the beads of one chromosome
-        pdb_coordinates_chrom_x = pdb_coordinates_df[pdb_coordinates_df["residue_number"]==i+1]
-        pdb_coordinates_chrom_x.reset_index(inplace=True, drop=True)
-
-        # Calculate Euclydian distances between each pair of beads
-        Euclydian_distances_after = np.sqrt((np.diff(np.array(pdb_coordinates_chrom_x["x_coord"]), axis=0))**2
-                                                +(np.diff(np.array(pdb_coordinates_chrom_x["y_coord"]), axis=0))**2
-                                                +(np.diff(np.array(pdb_coordinates_chrom_x["z_coord"]), axis=0))**2)
-        Euclydian_distances_after = np.append(Euclydian_distances_after, [0])
-
-        # Print mean and standard deviation of distances
-        print("mean distance between beads : "+str(np.mean(Euclydian_distances_after)))
-        print("Standard deviation of distances between beads : "+str(np.std(Euclydian_distances_after)))
-
-        # Get chromosome ATCG sequence
-        chromosome_sequence = str(genome_fasta[name].seq)
-
-        # Select extremities of inverted contigs, i.e. beads further than 3*mean(distances) from the next bead (arbitrary)
-        pdb_coordinates_chrom_x = pdb_coordinates_chrom_x.assign(distance = Euclydian_distances_after)
-        flipping_limits = pdb_coordinates_chrom_x["distance"]>3*np.mean(pdb_coordinates_chrom_x["distance"])
-        flipping_limits_index = list(pdb_coordinates_chrom_x[flipping_limits].index)
-
-        # TO DO kill script if odd number of flipping_limits_index
-
-        # Print number of inverted contigs, half the number of extremities
-        #print("number of inverted contigs : "+len(flipping_limits_index)/2)
-        
-        # Correct the beads order in the PDB and the bases order in the FASTA
-        if flipping_limits_index != []:
-            for j in range(0, len(flipping_limits_index), 2):
-
-                # The beads inside an inverted contig are between a first extremity bead (excluded) and the next extremity bead (included)
-                # The left extremity is excluded and the right one included because we look at the distance between the n and n+1 bead.
-                print("Detected inverted contig between bead n°"+str(flipping_limits_index[j]+1)+" and bead n°"+str(flipping_limits_index[j+1]))
-                
-                # Flip the beads corresponding to the inverted contigs
-                print("Flipping beads n°"+str(flipping_limits_index[j]+1)+" to n°"+str(flipping_limits_index[j+1]))
-                flipped_beads = pdb_coordinates_chrom_x.loc[flipping_limits_index[j]+1:flipping_limits_index[j+1],][::-1]
-                pdb_coordinates_chrom_x = pd.concat([pdb_coordinates_chrom_x.iloc[:flipping_limits_index[j]+1,:], flipped_beads.iloc[:,], pdb_coordinates_chrom_x.iloc[flipping_limits_index[j+1]+1:,]], axis=0)
-                
-                # Flip the bases corresponding th the inverted contigs
-                print("Flipping bases n°"+str((flipping_limits_index[j]+1)*HiC_resolution)+" to n°"+str((flipping_limits_index[j+1]+1)*HiC_resolution))
-                flipped_contig = chromosome_sequence[(flipping_limits_index[j]+1)*HiC_resolution:(flipping_limits_index[j+1]+1)*HiC_resolution]
-                flipped_contig = flipped_contig[::-1]
-                chromosome_sequence = chromosome_sequence[:(flipping_limits_index[j]+1)*HiC_resolution]+flipped_contig+chromosome_sequence[(flipping_limits_index[j+1]+1)*HiC_resolution:]
-                genome_fasta[name].seq = Seq(chromosome_sequence)
-        
-        pdb_coordinates_chrom_x.reset_index(inplace=True, drop=True)
-        pdb_coordinates_df_output = pd.concat([pdb_coordinates_df_output, pdb_coordinates_chrom_x.iloc[:,:-1]], axis=0)
-
-    # Write corrected beads list and corrected bases sequence to PDB file and FASTA file
-    with open(fasta_name_out, "w") as handle:
-        SeqIO.write(genome_fasta.values(), handle, "fasta")
-
-    pdb_coordinates_df_output.reset_index(inplace=True, drop=True)
-    pdb_coordinates_df_output["line_idx"] = pdb_coordinates_df_output.index
-    pdb_coordinates.df["ATOM"] = pdb_coordinates_df_output
-    pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
-    print(f"Wrote {pdb_name_out} and {fasta_name_out}")
+    # Write genome sequence.
+    with open(fasta_name_out, "w") as fasta_file:
+        SeqIO.write(genome_fasta.values(), fasta_file, "fasta")
 
 
 if __name__ == "__main__":
+    # Parse command line arguments.
     ARGS = get_cli_arguments()
 
-    # Read Fasta file and get chromosome length
-    CHROMOSOME_LENGTH = extract_chromosome_length(ARGS.fasta)
-    CHROMOSOME_NAME = extract_chromosome_name(ARGS.fasta)
+    # Read Fasta file and extract chromosome names and lengths.
+    CHROMOSOME_NAMES, CHROMOSOME_LENGTHS = extract_chromosome_name_length(ARGS.fasta)
 
-    # Assign chromosome number
-    flip_inverted_contig(ARGS.pdb, CHROMOSOME_LENGTH, CHROMOSOME_NAME, ARGS.fasta, ARGS.resolution, ARGS.output_pdb, ARGS.output_fasta)
+    # Find inverted contigs.
+    INVERTED_CONTIGS = find_inverted_contigs(
+        ARGS.pdb, CHROMOSOME_LENGTHS, ARGS.resolution, ARGS.threshold
+    )
 
+    # Flip inverted contigs in the genome 3D structure and sequence.
+    flip_inverted_contigs_in_structure(
+        INVERTED_CONTIGS,
+        ARGS.pdb,
+        ARGS.output_pdb
+    )
+    flip_inverted_contigs_in_sequence(
+        INVERTED_CONTIGS,
+        CHROMOSOME_NAMES,
+        ARGS.fasta,
+        ARGS.resolution,
+        ARGS.output_fasta,
+    )
