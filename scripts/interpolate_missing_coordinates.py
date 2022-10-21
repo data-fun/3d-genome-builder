@@ -8,7 +8,6 @@ import argparse
 import pandas as pd
 
 from biopandas.pdb import PandasPdb
-from scipy.interpolate import PchipInterpolator
 
 
 def get_cli_arguments():
@@ -51,6 +50,7 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
     """
     pdb = PandasPdb().read_pdb(pdb_name_in)
     atoms = pdb.df["ATOM"]
+    interpolate_atoms = pd.DataFrame(columns=atoms.columns)
     print(f"Found {atoms.shape[0]} beads in {pdb_name_in}")
     for residue_number in atoms["residue_number"].unique():
         missing_beads = (
@@ -61,37 +61,29 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
             .sum()
             .sum()
         ) // 3
+        chromosome = atoms.query(f"residue_number == {residue_number}")
         if not missing_beads:
+            interpolate_atoms = pd.concat([interpolate_atoms, chromosome])
             continue
         print(f"Chromosome {residue_number} has {missing_beads} missing beads")
-        chromosome = atoms.query(f"residue_number == {residue_number}")
-        beads_index = chromosome.dropna(
-            subset=["x_coord", "y_coord", "z_coord"]
-        ).index.to_numpy()
-        beads_x = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
-            "x_coord"
-        ].to_numpy()
-        beads_y = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
-            "y_coord"
-        ].to_numpy()
-        beads_z = chromosome.dropna(subset=["x_coord", "y_coord", "z_coord"])[
-            "z_coord"
-        ].to_numpy()
-        missing_beads_index = chromosome.loc[
-            chromosome[["x_coord", "y_coord", "z_coord"]].isna().any(axis=1)
-        ].index.to_numpy()
-        # Build models for each chromosome and each coordinate
-        interpolate_x = PchipInterpolator(beads_index, beads_x)
-        interpolate_y = PchipInterpolator(beads_index, beads_y)
-        interpolate_z = PchipInterpolator(beads_index, beads_z)
-        for bead_index in missing_beads_index:
-            atoms.loc[bead_index, "x_coord"] = interpolate_x(bead_index)
-            atoms.loc[bead_index, "y_coord"] = interpolate_y(bead_index)
-            atoms.loc[bead_index, "z_coord"] = interpolate_z(bead_index)
+        
+        # Build models for each chromosome
+        #TODO faire l'interpolation en une seule ligne, sur les 3 colonnes
+        interpolate_chromosome = chromosome.copy()
+        interpolate_chromosome["x_coord"] = chromosome["x_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        interpolate_chromosome["y_coord"] = chromosome["y_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        interpolate_chromosome["z_coord"] = chromosome["z_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        deleted_atoms = interpolate_chromosome["x_coord"].isna().sum()
+        print(f"Removed {deleted_atoms} atoms from chromosome {residue_number} extremities")
+            
+        interpolate_atoms = pd.concat([interpolate_atoms, interpolate_chromosome])
     # atoms["atom_name"] = "CA"
     # atoms["element_symbol"] = "C"
     # atoms["b_factor"] = 0.0
-    pdb.df["ATOM"] = atoms
+    interpolate_atoms.dropna(subset=["x_coord", "y_coord", "z_coord"], inplace=True)
+    print(f"Found {interpolate_atoms.shape[0]} beads after interpolation and extremities nan beads removal.")
+    
+    pdb.df["ATOM"] = interpolate_atoms
     pdb.to_pdb(pdb_name_out)
     print(f"Wrote {pdb_name_out}")
 
