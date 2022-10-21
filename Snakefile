@@ -224,8 +224,6 @@ rule build_contact_maps:
 rule run_pastis_nb:
     input:
         matrix="dense_matrix/merge_{resolution}_dense.matrix",
-        #matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix",
-        #matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix",
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
     output:
         "pastis/structure_{resolution}.pdb"
@@ -273,6 +271,23 @@ rule interpolate_missing_coordinates:
     shell:
         "python ../scripts/interpolate_missing_coordinates.py "
         "--pdb {input} "
+        "--output {output}"
+
+
+rule map_parameter :
+    input:
+        structure="structure/{resolution}/structure_completed.pdb"
+        parameter="quantitative_parameter/parameter.bedgraph"
+    output:
+        "structure/{resolution}/structure_with_quantitative_parameter.pdb"
+    message:
+        "Projecting quantitative parameter on the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/map_parameter.py "
+        "--pdb {structure} "
+        "--parameter {parameter}
         "--output {output}"
 
 

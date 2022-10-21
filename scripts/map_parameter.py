@@ -3,16 +3,16 @@
 It requires:
 - a PDB file containing the genome structure,
 - a fasta file containing the genome sequence,
+- a BedGraph file containning the quantitative parameter,
 - a resolution.
 """
 
 import argparse
-import math
+from symbol import atom
 import pandas as pd
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
-
 
 
 def get_cli_arguments():
@@ -25,7 +25,6 @@ def get_cli_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
         "--pdb",
         action="store",
         type=str,
@@ -33,31 +32,13 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
-        "--fasta",
+        "--BedGraph",
         action="store",
         type=str,
-        help="Fasta file containing the sequence of the genome",
+        help="BedGraph file containing the quantitative parameter",
         required=True,
     )
     parser.add_argument(
-        "-a",
-        "--annotation",
-        action="store",
-        type=str,
-        help="csvfile containing the quantitative parameter",
-        required=True,
-    )
-    parser.add_argument(
-        "-r",
-        "--resolution",
-        action="store",
-        type=int,
-        help="HiC resolution",
-        required=True,
-    )
-    parser.add_argument(
-        "-o",
         "--output",
         action="store",
         type=str,
@@ -67,30 +48,7 @@ def get_cli_arguments():
     return parser.parse_args()
 
 
-def extract_chromosome_length(fasta_name):
-    """Extract chromosome length from a FASTA file.
-
-    Parameters
-    ----------
-    fasta_name : str
-        Name of Fasta file containing the sequence of the genome
-    
-    Returns
-    -------
-    list
-        List of chromosome lengthes
-    """
-    chromosome_length_lst = []
-    with open(fasta_name, "r") as fasta_file:
-        print(f"Reading {fasta_name}")
-        for record in SeqIO.parse(fasta_file, "fasta"):
-            length = len(record.seq)
-            print(f"Found chromosome {record.id} with {length} bases")
-            chromosome_length_lst.append(length)
-    return chromosome_length_lst
-
-
-def map_parameter(pdb_name_in, chromosome_length, annotation, HiC_resolution, pdb_name_out):
+def map_parameter(pdb_name_in, BedGraph, pdb_name_out):
     """Assign a quantitative parameter to the whole genome 3D structure.
 
     Note:
@@ -102,39 +60,37 @@ def map_parameter(pdb_name_in, chromosome_length, annotation, HiC_resolution, pd
     ----------
     pdb_name_in : str
         PDB file containing the 3D structure of the genome
-    chromosome_length : list
-        List with chromosome lengths
-    annotation : str
-        txt file containing the annotation of a quantitative parameter
+    BedGraph : str
+        BedGraph file containing the annotation of a quantitative parameter
     HiC_resolution : int
         HiC resolution
     pdb_name_out : str
         Output PDB file containing the annotated 3D structure of the genome
     """
-    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
-    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
 
-    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+    pdb = PandasPdb().read_pdb(pdb_name_in)
+    print(f"Number of beads read from structure: {pdb.df['ATOM'].shape[0]}")
+    atoms = pdb.df["ATOM"]
+    quantitative_parameter = pd.read_csv(BedGraph, sep="\t", header=None)
 
-    pdb_coordinates_df = pdb_coordinates.df["ATOM"]
+    # Get the index of the beads without the ones already removed from the pdb file (by interpolate_missing_coordinates.py )
+    atom_number = list(atoms["atom_number"]-1)
 
-    chipseq = pd.read_csv(annotation, sep="\t", header=None)
-    chrom_names = {"chr1": 1, "chr2": 2, "chr3": 3, "chr4": 4, "chr5": 5, "chr6": 6, "chr7": 7}
-    chipseq[0]= chipseq[0].map(chrom_names)
+    # Delete the quantitative parameter values corresponding to removed beads
+    quantitative_parameter = quantitative_parameter.loc[atom_number]
+    quantitative_parameter.reset_index(drop=True, inplace=True)
 
-    pdb_coordinates_df["b_factor"]=chipseq[3]
+    # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column
+    #TODO ajouter la normalisation pour les valeurs au dessus de 999.99
+    atoms["b_factor"]=quantitative_parameter[3]
 
-    pdb_coordinates.df["ATOM"] = pdb_coordinates_df
-    pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
+    pdb.df["ATOM"] = atoms
+    pdb.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
     print(f"Wrote {pdb_name_out}")
 
 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
 
-    # Read Fasta file and get chromosome length
-    CHROMOSOME_LENGTH = extract_chromosome_length(ARGS.fasta)
-
     # Assign chromosome number
-    map_parameter(ARGS.pdb, CHROMOSOME_LENGTH, ARGS.annotation, ARGS.resolution, ARGS.output)
+    map_parameter(ARGS.pdb, ARGS.annotation, ARGS.output)
