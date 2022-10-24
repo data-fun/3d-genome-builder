@@ -274,7 +274,7 @@ rule interpolate_missing_coordinates:
         "--output {output}"
 
 
-rule map_parameter :
+rule map_parameter:
     input:
         structure="structure/{resolution}/structure_completed.pdb"
         parameter="quantitative_parameter/parameter.bedgraph"
