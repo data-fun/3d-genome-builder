@@ -8,14 +8,13 @@ It requires:
 """
 
 import argparse
-import math
+from mimetypes import suffix_map
+from numpy import NaN
 import pandas as pd
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
 from numpy import NaN
-from scipy.interpolate import PchipInterpolator
-
 
 def get_cli_arguments():
     """Command line argument parser.
@@ -27,7 +26,6 @@ def get_cli_arguments():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-p",
         "--pdb",
         action="store",
         type=str,
@@ -35,7 +33,6 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-f",
         "--fasta",
         action="store",
         type=str,
@@ -43,34 +40,24 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "-a",
         "--annotation",
         action="store",
         type=str,
-        help="txt file containing the annotation of genes",
+        help="BedGraph file containing the annotation of genes",
         required=True,
     )
     parser.add_argument(
-        "-r",
-        "--resolution",
-        action="store",
-        type=int,
-        help="HiC resolution",
-        required=True,
-    )
-    parser.add_argument(
-        "-o",
         "--output",
         action="store",
         type=str,
-        help="Output PDB file containing the annotated 3D structure of the genome",
+        help="Output mmCIF file containing the annotated 3D structure of the genome",
         required=True,
     )
     return parser.parse_args()
 
 def extract_chromosome_length(fasta_name):
     """Extract chromosome length from a FASTA file.
-
+    
     Parameters
     ----------
     fasta_name : str
@@ -79,7 +66,7 @@ def extract_chromosome_length(fasta_name):
     Returns
     -------
     list
-        List of chromosome lengthes
+        List of chromosome lengths
     """
     chromosome_length_lst = []
     with open(fasta_name, "r") as fasta_file:
@@ -90,8 +77,34 @@ def extract_chromosome_length(fasta_name):
             chromosome_length_lst.append(length)
     return chromosome_length_lst
 
+def get_base_pair_coordinates(atoms, chromosome_lengths, HiC_resolution):
+    """Interpolate genes according to a PDB file containing a 3D genome structure.
+    
+    Parameters
+    ----------
+    pdb_name_in : str
+        PDB file containing the 3D structure of the genome
+    chromosome_length : list
+        List with chromosome lengths
+    HiC_resolution : int
+        HiC resolution
+    """
+    atoms_bp_coor = pd.Series(dtype="int")
+    for residue_number in atoms["residue_number"].unique():
+        atoms_bp_coor_chromosome = pd.Series(range(0, chromosome_lengths[residue_number-1], HiC_resolution))
+        atoms_bp_coor = pd.concat([atoms_bp_coor, atoms_bp_coor_chromosome])
+    
+    # Get the index of the beads without the ones already removed from the pdb file (by interpolate_missing_coordinates.py )
+    atom_number = list(atoms["atom_number"]-1)
+    # Delete the base pair coordinates corresponding to removed beads
+    atoms_bp_coor.reset_index(drop=True, inplace=True)
+    atoms_bp_coor = atoms_bp_coor.iloc[atom_number]
+    atoms_bp_coor.reset_index(drop=True, inplace=True)
+    
+    atoms["bp_coordinate"] = atoms_bp_coor
+    return atoms
 
-def interpolate_genes(pdb_name_in, chromosome_length, annotation, HiC_resolution, pdb_name_out):
+def interpolate_genes(pdb_name_in, chromosome_lengths, annotation_name_in, HiC_resolution, mmCIF_name_out):
     """Interpolate genes according to a PDB file containing a 3D genome structure.
 
     Note:
@@ -105,78 +118,62 @@ def interpolate_genes(pdb_name_in, chromosome_length, annotation, HiC_resolution
         PDB file containing the 3D structure of the genome
     chromosome_length : list
         List with chromosome lengths
-    annotation : str
-        csv file containing the annotation of genes
+    annotation_name_in : str
+        BedGraph file containing the annotation of genes
     HiC_resolution : int
         HiC resolution
-    pdb_name_out : str
-        Output PDB file containing the annotated 3D structure of the genome
+    mmCIF_name_out : str
+        Output mmCIF file containing the annotated 3D structure of the genome
     """
-    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
-    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
+    pdb = PandasPdb().read_pdb(pdb_name_in)
+    print(f"Number of beads read from structure: {pdb.df['ATOM'].shape[0]}")
+    atoms = pdb.df["ATOM"]
+    atoms = get_base_pair_coordinates(atoms, chromosome_lengths, HiC_resolution)
+    atoms_output = pd.DataFrame(columns=atoms.columns)
 
-    beads_per_chromosome = [math.ceil(length/HiC_resolution) for length in chromosome_length]
-    print(f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}")
+    genes_bp_coordinates = pd.read_csv(annotation_name_in, sep="\t", header=None)
+    genes_bp_coordinates.columns = ["residue_number", "bp_coordinate", "stop", "atom_name"]
+    
+    for residue_number in atoms["residue_number"].unique():
+        atoms_chromosome = atoms[atoms["residue_number"]==residue_number]
+        genes_bp_coordinates_chromosome = genes_bp_coordinates[genes_bp_coordinates["residue_number"]==residue_number]
+        
+        atoms_genes_chromosome = atoms_chromosome.merge(genes_bp_coordinates_chromosome, on="bp_coordinate", how="outer", sort=True, suffixes=("_x", None))
+        atoms_genes_chromosome_interpolate = atoms_genes_chromosome.copy()
+        atoms_genes_chromosome_interpolate["x_coord"] = atoms_genes_chromosome["x_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        atoms_genes_chromosome_interpolate["y_coord"] = atoms_genes_chromosome["y_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        atoms_genes_chromosome_interpolate["z_coord"] = atoms_genes_chromosome["z_coord"].interpolate(method='pchip', axis=0, limit_area='inside')
+        deleted_atoms = atoms_genes_chromosome_interpolate["x_coord"].isna().sum()
+        print(f"Removed {deleted_atoms} genes from chromosome {residue_number} extremities")
+        
+        atoms_output = pd.concat([atoms_output, atoms_genes_chromosome_interpolate])
+    
+    atoms_output = atoms_output[atoms_output["record_name"]!="ATOM"]
+    genes_output = atoms_output.dropna(subset=["x_coord"])
+    
+    genes_output.reset_index(drop=True, inplace=True)
+    genes_output["residue_number"] = genes_output["residue_number"].astype(int)
+    genes_output = genes_output.assign(record_name="ATOM",
+                                        atom_number=list(range(1,len(genes_output)+1)),
+                                        blank_1="",
+                                        alt_loc="",
+                                        residue_name="CHR",
+                                        blank_2="",
+                                        chain_id="G",
+                                        insertion="",
+                                        blank_3="",
+                                        occupancy=1,
+                                        b_factor=75,
+                                        blank_4="",
+                                        segment_id="",
+                                        element_symbol="",
+                                        charge=NaN,
+                                        line_idx=atoms_output.index)
+    genes_output.drop(["bp_coordinate", "atom_name_x",  "residue_number_x", "stop"], axis= 1, inplace=True)
 
-    pdb_coordinates_df = pdb_coordinates.df["ATOM"]
-    pdb_coordinates_df_output = pdb_coordinates_df.iloc[:1,]
-
-    loci_bp_coordinates = pd.read_csv(annotation, sep="\t", header=None)
-    loci_bp_coordinates = loci_bp_coordinates[loci_bp_coordinates[2]=="CDS"]
-    loci_bp_coordinates[0].replace({"Supercontig_14.1": 1,
-                                        "Supercontig_14.2": 2,
-                                        "Supercontig_14.3": 3,
-                                        "Supercontig_14.4": 4,
-                                        "Supercontig_14.5": 5,
-                                        "Supercontig_14.6": 6,
-                                        "Supercontig_14.7": 7}, inplace=True)
-    loci_bp_coordinates["gene_name"] = loci_bp_coordinates[8].str[9:17]
-    loci_bp_coordinates.reset_index(drop=True, inplace=True)
-    loci_bp_coordinates.drop([1, 2, 5, 6, 7, 8], axis = 1, inplace=True)
-    loci_bp_coordinates.rename(columns = {0:"chrom", 3:"start", 4:"stop"}, inplace = True)
-
-    new_atoms = pd.DataFrame(columns = ["residue_number", "x_coord", "y_coord", "z_coord"])
-
-    for i in range(len(chromosome_length)):
-        loci_bp_coordinates_chrom_x = loci_bp_coordinates[loci_bp_coordinates["chrom"]==i+1]
-        loci_bp_coordinates_chrom_x = loci_bp_coordinates_chrom_x["start"]
-        chrom_x = pdb_coordinates_df[pdb_coordinates_df["residue_number"]==i+1]
-        chrom_x = [list(chrom_x["x_coord"]), list(chrom_x["y_coord"]), list(chrom_x["z_coord"])]
-
-        atoms_bp_coor = list(range(0, chromosome_length[i], HiC_resolution))
-        x_3d_coor = chrom_x[0]
-        loci_x_3d_coor = PchipInterpolator(atoms_bp_coor, x_3d_coor)(loci_bp_coordinates_chrom_x)
-        y_3d_coor = chrom_x[1]
-        loci_y_3d_coor = PchipInterpolator(atoms_bp_coor, y_3d_coor)(loci_bp_coordinates_chrom_x)
-        z_3d_coor = chrom_x[2]
-        loci_z_3d_coor = PchipInterpolator(atoms_bp_coor, z_3d_coor)(loci_bp_coordinates_chrom_x)
-
-        new_atoms_chrom_x = pd.DataFrame(zip([i+1]*len(loci_x_3d_coor), loci_x_3d_coor, loci_y_3d_coor, loci_z_3d_coor), columns=["residue_number", "x_coord", "y_coord", "z_coord"])
-        new_atoms = pd.concat([new_atoms, new_atoms_chrom_x], sort=False)
-
-    new_atoms.reset_index(drop=True, inplace=True)
-    pdb_coordinates_df_output = pd.concat([pdb_coordinates_df_output.iloc[:-1,], new_atoms], axis=0)
-    pdb_coordinates_df_output = pdb_coordinates_df_output.assign(record_name="ATOM",
-                                                                    atom_number=list(range(0,len(new_atoms))),
-                                                                    blank_1="",
-                                                                    atom_name="O",
-                                                                    alt_loc="",
-                                                                    residue_name="CHR",
-                                                                    blank_2="",
-                                                                    chain_id="G",
-                                                                    insertion="",
-                                                                    blank_3="",
-                                                                    occupancy=1,
-                                                                    b_factor=75,
-                                                                    blank_4="",
-                                                                    segment_id="",
-                                                                    element_symbol="",
-                                                                    charge=NaN,
-                                                                    line_idx=pdb_coordinates_df_output.index)
-
-    pdb_coordinates.df["ATOM"] = pdb_coordinates_df_output
-    pdb_coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
-    print(f"Wrote {pdb_name_out}")
+    pdb.df["ATOM"] = genes_output
+    pdb.to_pdb(path=mmCIF_name_out, records=None, gz=False, append_newline=True)
+    print(f"Wrote {mmCIF_name_out}")
 
 
 if __name__ == "__main__":

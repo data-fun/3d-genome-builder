@@ -77,7 +77,7 @@ def map_parameter(pdb_name_in, BedGraph, pdb_name_out):
     atom_number = list(atoms["atom_number"]-1)
 
     # Delete the quantitative parameter values corresponding to removed beads
-    quantitative_parameter = quantitative_parameter.loc[atom_number]
+    quantitative_parameter = quantitative_parameter.iloc[atom_number]
     quantitative_parameter.reset_index(drop=True, inplace=True)
 
     # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column
