@@ -1,4 +1,4 @@
-"""Detect inverted contigs from a PDB file containing a 3D genome structure.
+"""Detect and flip inverted contigs from a PDB file containing a 3D genome structure.
 
 Flip inverted contigs in the 3D structure and in the sequence of the genome.
 
