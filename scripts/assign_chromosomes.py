@@ -12,7 +12,6 @@ It requires:
 import argparse
 import math
 from pathlib import Path
-import string
 
 from Bio import SeqIO
 from biopandas.pdb import PandasPdb
@@ -20,17 +19,17 @@ from biopandas.pdb import PandasPdb
 
 def is_file(parser, file_path):
     """Check file exists.
-    
+
     Parameters
     ----------
     parser : argparse.ArgumentParser
-        Command line argument parser
+        Command line argument parser.
     file_path : str
         File path
     Returns
     -------
     str
-        File path    
+        File path.
     """
     if not Path(file_path).is_file():
         parser.error(f"The file {file_path} does not exist")
@@ -44,7 +43,7 @@ def get_cli_arguments():
     Returns
     -------
     argparse.Namespace
-        Object containing arguments
+        Object containing arguments.
     """
     parser = argparse.ArgumentParser(add_help=False)
     required = parser.add_argument_group("required arguments")
@@ -95,7 +94,7 @@ def extract_chromosome_length(fasta_name):
     ----------
     fasta_name : str
         Name of Fasta file containing the sequence of the genome.
-    
+
     Returns
     -------
     list
@@ -133,22 +132,23 @@ def assign_chromosome_number(
         Output PDB file containing the annotated 3D structure of the genome.
     """
     coordinates = PandasPdb().read_pdb(pdb_name_in)
-    coordinates_df = coordinates.df['ATOM']
+    coordinates_df = coordinates.df["ATOM"]
+    # Verify the number of beads in the structure
+    # and the number of beads deduced from the sequence and resolution
+    # are the same.
     print(f"Number of beads read from structure: {coordinates_df.shape[0]}")
-
     beads_per_chromosome = [
         math.ceil(length / HiC_resolution) for length in chromosome_length
     ]
     print(
         f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}"
     )
-    # Verify the number of beads in the structure
-    # and the number of beads deduced from the sequence and resolution 
-    # are the same.
     if coordinates_df.shape[0] != sum(beads_per_chromosome):
-        raise ValueError("Number of beads in structure and "
-                         "number of beads deduced from sequence and resolution "
-                         "are different.")
+        raise ValueError(
+            "Number of beads in structure and "
+            "number of beads deduced from sequence and resolution "
+            "are different."
+        )
     # Add residue (chromosome) number.
     residue_number = []
     for index, bead_number in enumerate(beads_per_chromosome):
@@ -156,30 +156,33 @@ def assign_chromosome_number(
     coordinates_df["residue_number"] = residue_number
 
     # Add residue name based on residue number.
-    coordinates_df["residue_name"] = coordinates_df["residue_number"].apply(lambda x: f"C{x:02d}")
+    coordinates_df["residue_name"] = coordinates_df["residue_number"].apply(
+        lambda x: f"C{x:02d}"
+    )
 
     # Add chain (chromosome) name.
     # Chromosome 1 -> Chain A
     # Chromosome 2 -> Chain B
-    # Chromosome 3 -> Chain C
     # ...
-    letters = string.ascii_uppercase
+    # Chromosome 26 -> Chain Z
+    # Chromosome 27 -> Chain A
+    # Chromosome 28 -> Chain B
+    # ...
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     # Handle case where there are more than 26 chromosomes.
     repeat_factor = math.ceil(len(chromosome_length) / len(letters))
-    residue_to_chain = dict(zip(coordinates_df["residue_number"].unique(), letters * repeat_factor))
+    residue_to_chain = dict(
+        zip(coordinates_df["residue_number"].unique(), letters * repeat_factor)
+    )
     # Map residue number to chain id.
     coordinates_df["chain_id"] = coordinates_df["residue_number"].map(residue_to_chain)
 
     # Fix atom number starting at 1 (instead of 0).
-    coordinates_df["atom_number"] = (
-        coordinates_df["atom_number"] + 1
-    )
+    coordinates_df["atom_number"] = coordinates_df["atom_number"] + 1
 
-    # Wirte new PDB file to disk.
-    coordinates.df['ATOM'] = coordinates_df
-    coordinates.to_pdb(
-        path=pdb_name_out, records=None, gz=False, append_newline=True
-    )
+    # Write new PDB file to disk.
+    coordinates.df["ATOM"] = coordinates_df
+    coordinates.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
     print(f"Wrote {pdb_name_out}")
 
 
