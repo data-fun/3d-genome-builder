@@ -10,6 +10,7 @@ This script requires:
 
 import argparse
 import math
+from operator import invert
 import sys
 
 from Bio import SeqIO
@@ -108,7 +109,7 @@ def extract_chromosome_name_length(fasta_name):
     chromosome_name_lst = []
     chromosome_length_lst = []
     with open(fasta_name, "r") as fasta_file:
-        print(f"Reading {fasta_name}")
+        print(f"Reading genome sequence in {fasta_name}")
         for record in SeqIO.parse(fasta_file, "fasta"):
             name = record.id
             length = len(record.seq)
@@ -116,28 +117,6 @@ def extract_chromosome_name_length(fasta_name):
             chromosome_name_lst.append(name)
             chromosome_length_lst.append(length)
     return chromosome_name_lst, chromosome_length_lst
-
-
-def compute_bead_distances(atom_array):
-    """Compute distance between beads.
-
-    Parameters
-    ----------
-    atom_array : numpy.ndarray
-        Array containing beads coordinates. Array dimensions are (n, 3).
-
-    Returns
-    -------
-    numpy.ndarray
-        Distance between beads as 1D-array.
-    """
-    distances = np.sqrt(
-        (np.diff(atom_array[:, 0], axis=0)) ** 2
-        + (np.diff(atom_array[:, 1], axis=0)) ** 2
-        + (np.diff(atom_array[:, 2], axis=0)) ** 2
-    )
-    distances = np.append(distances, [0])
-    return distances
 
 
 def find_inverted_contigs(
@@ -168,11 +147,11 @@ def find_inverted_contigs(
     structure_df = pdb_structure.df["ATOM"]
     print(f"Number of beads read from structure: {structure_df.shape[0]}")
 
-    if structure_df["residue_number"].isna().sum() > 0:
-        print(structure_df["residue_number"].isna().sum())
-        sys.exit(
-            f"Cannot process structure {pdb_name_in} because it contains missing residue numbers (chromosomes)"
-        )
+    coord_columns = ["x_coord", "y_coord", "z_coord"]
+    missing_beads_number = structure_df[coord_columns].isna().sum().sum() // 3
+    print(
+        f"Found {missing_beads_number} missing beads in structure"
+    )
 
     beads_per_chromosome = [
         math.ceil(length / HiC_resolution) for length in chromosome_lengths
@@ -183,7 +162,9 @@ def find_inverted_contigs(
 
     if structure_df.shape[0] != sum(beads_per_chromosome):
         sys.exit(
-            f"Cannot process structure {pdb_name_in} because it contains {structure_df.shape[0]} beads instead of {sum(beads_per_chromosome)}"
+            f"Cannot process structure {pdb_name_in} because it contains "
+            f"{structure_df.shape[0]} beads "
+            f"instead of {sum(beads_per_chromosome)}"
         )
 
     inverted_contigs = {}
@@ -197,11 +178,12 @@ def find_inverted_contigs(
         ).reset_index(drop=True)
 
         # Compute Euclidean distances between bead n and bead n+1
-        coordinates = chromosome_df[
-            ["x_coord", "y_coord", "z_coord"]
-        ].to_numpy()
-        euclidean_distances = compute_bead_distances(coordinates)
-        median_distance = np.median(euclidean_distances)
+        chromosome_df["distance"] = np.linalg.norm(
+            chromosome_df[coord_columns].to_numpy() - chromosome_df[coord_columns].shift(-1).to_numpy(),
+            axis=1
+        )
+        # Compute median distance with possible Nan values
+        median_distance = chromosome_df["distance"].median(skipna=True)
         print(f"Median distance between beads: {median_distance:.2f}")
 
         # Select extremities of inverted contigs
@@ -209,9 +191,17 @@ def find_inverted_contigs(
         # Output beads coordinates with distances
         if ARGS.debug:
             filename = f"chr_{chrom_num}.tsv"
+            target_columns = [
+                "record_name", "atom_number", "atom_name",
+                "residue_name", "chain_id", "residue_number",
+                "x_coord", "y_coord", "z_coord", "line_idx",
+                "distance",
+            ]
             print(f"DEBUG: writing {filename} with distances.")
-            chromosome_df.to_csv(filename, sep="\t", index=False)
-        chromosome_df = chromosome_df.assign(distance=euclidean_distances)
+            chromosome_df[target_columns].to_csv(
+                filename, sep="\t", index=False, na_rep="nan"
+            )
+        
         beads_selection = (
             chromosome_df["distance"] > threshold * median_distance
         )
@@ -256,6 +246,8 @@ def flip_inverted_contigs_in_structure(
     """
     pdb_structure = PandasPdb().read_pdb(pdb_name_in)
     coordinates = pdb_structure.df["ATOM"]
+    if sum(map(len, inverted_contigs.values()))== 0:
+        sys.exit("\nNothing to fix. Structure is fine.")
     print("\nFlipping contigs.")
     for chrom_num in inverted_contigs:
         for contig in inverted_contigs[chrom_num]:
