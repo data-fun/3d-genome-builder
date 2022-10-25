@@ -307,7 +307,6 @@ rule interpolate_genes:
         "--pdb {input.structure} "
         "--fasta {input.sequence} "
         "--resolution {wildcards.resolution} "
-        "--output {input.output} "
         "--annotation {input.annotation} "
         "--output {output} "
 
