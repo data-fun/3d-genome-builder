@@ -265,7 +265,7 @@ rule verify_inverted_contigs:
         sequence="genome.fasta"
     output:
         struture="structure/{resolution}/structure_verified_contigs.pdb",
-        sequence="genome_verified_contigs.fasta"
+        sequence="corrected_fasta/{resolution}/genome_verified_contigs.fasta"
     message:
         "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
     conda:
@@ -296,7 +296,7 @@ rule add_missing_beads:
 
 rule map_parameter:
     input:
-        structure="structure/{resolution}/structure_completed.pdb"
+        structure="structure/{resolution}/structure_completed.pdb",
         parameter="annotations/{resolution}/parameter.bedgraph"
     output:
         "structure/{resolution}/structure_with_quantitative_parameter.pdb"
@@ -313,8 +313,8 @@ rule map_parameter:
 
 rule interpolate_genes:
     input:
-        structure="structure/{resolution}/structure_completed.pdb"
-        annotation="annotations/genes_annotation.bedgraph"
+        structure="structure/{resolution}/structure_completed.pdb",
+        annotation="annotations/genes_annotation.bedgraph",
         sequence="genome.fasta"
     output:
         "structure/{resolution}/structure_with_genes.pdb"
@@ -333,7 +333,7 @@ rule interpolate_genes:
 
 rule convert_to_g3d:
     input:
-        structure="structure/{resolution}/structure_completed.pdb"
+        structure="structure/{resolution}/structure_completed.pdb",
         sequence="genome.fasta"
     output:
         "structure/{resolution}/structure_completed.g3d"
