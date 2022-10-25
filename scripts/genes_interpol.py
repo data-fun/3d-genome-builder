@@ -40,6 +40,13 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
+        "--resolution",
+        action="store",
+        type=int,
+        help="HiC resolution from which the structure has been generated.",
+        required=True,
+    )
+    parser.add_argument(
         "--annotation",
         action="store",
         type=str,
@@ -103,6 +110,13 @@ def get_base_pair_coordinates(atoms, chromosome_lengths, HiC_resolution):
     
     atoms["bp_coordinate"] = atoms_bp_coor
     return atoms
+
+def write_mmCIF(genes_output, mmCIF_name_out):
+    out = open(mmCIF_name_out, "w")
+    out.write("#\nloop_\n_atom_site.group_PDB\n_atom_site.label_seq_id\n_atom_site.label_atom_id\n_atom_site.label_asym_id\n_atom_site.label_comp_id\n_atom_site.Cartn_x\n_atom_site.Cartn_y\n_atom_site.Cartn_z\n_atom_site.B_iso_or_equiv_esd\n")
+    genes_output_str = genes_output.to_string(header=False, index=False, columns=["record_name", "atom_number", "residue_name", "chain_id", "atom_name", "x_coord", "y_coord", "z_coord", "b_factor"])
+    out.write(genes_output_str)
+    out.close
 
 def interpolate_genes(pdb_name_in, chromosome_lengths, annotation_name_in, HiC_resolution, mmCIF_name_out):
     """Interpolate genes according to a PDB file containing a 3D genome structure.
@@ -168,11 +182,10 @@ def interpolate_genes(pdb_name_in, chromosome_lengths, annotation_name_in, HiC_r
                                         segment_id="",
                                         element_symbol="",
                                         charge=NaN,
-                                        line_idx=atoms_output.index)
+                                        line_idx=genes_output.index)
     genes_output.drop(["bp_coordinate", "atom_name_x",  "residue_number_x", "stop"], axis= 1, inplace=True)
 
-    pdb.df["ATOM"] = genes_output
-    pdb.to_pdb(path=mmCIF_name_out, records=None, gz=False, append_newline=True)
+    write_mmCIF(genes_output, mmCIF_name_out)
     print(f"Wrote {mmCIF_name_out}")
 
 

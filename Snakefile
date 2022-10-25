@@ -277,7 +277,7 @@ rule interpolate_missing_coordinates:
 rule map_parameter:
     input:
         structure="structure/{resolution}/structure_completed.pdb"
-        parameter="quantitative_parameter/parameter.bedgraph"
+        parameter="annotations/parameter.bedgraph"
     output:
         "structure/{resolution}/structure_with_quantitative_parameter.pdb"
     message:
@@ -286,9 +286,30 @@ rule map_parameter:
         "envs/workflow.yml"
     shell:
         "python ../scripts/map_parameter.py "
-        "--pdb {structure} "
-        "--parameter {parameter}
+        "--pdb {input.structure} "
+        "--parameter {input.parameter}"
         "--output {output}"
+
+
+rule interpolate_genes:
+    input:
+        structure="structure/{resolution}/structure_completed.pdb"
+        annotation="annotations/genes_anotation.bedgraph"
+        sequence="genome.fasta"
+    output:
+        "structure/{resolution}/structure_with_genes.pdb"
+    message:
+        "Projecting genes on the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/genes_interpol.py "
+        "--pdb {input.structure} "
+        "--fasta {input.sequence} "
+        "--resolution {wildcards.resolution} "
+        "--output {input.output} "
+        "--annotation {input.annotation} "
+        "--output {output} "
 
 
 rule clean:
