@@ -94,9 +94,7 @@ def extract_chromosome_length(fasta_name):
     return chromosome_length_lst
 
 
-def convert_to_g3d(
-    pdb_name_in, chromosome_length, HiC_resolution, g3d_name_out
-):
+def convert_to_g3d(pdb_name_in, chromosome_length, HiC_resolution, g3d_name_out):
     """Assign chromosome numbers to the whole genome 3D structure.
 
     Note:

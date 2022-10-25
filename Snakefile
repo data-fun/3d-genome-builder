@@ -312,6 +312,24 @@ rule interpolate_genes:
         "--output {output} "
 
 
+rule convert_to_g3d:
+    input:
+        structure="structure/{resolution}/structure_completed.pdb"
+        sequence="genome.fasta"
+    output:
+        "structure/{resolution}/structure_completed.g3d"
+    message:
+        "Converting to g3d format"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/convert_to_g3d.py "
+        "--pdb {input.structure} "
+        "--fasta {input.sequence} "
+        "--resolution {wildcards.resolution} "
+        "--output {output}"
+
+
 rule clean:
     shell:
         "rm -rf logs HiC-Pro dense_matrix pastis"
