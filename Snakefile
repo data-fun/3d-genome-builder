@@ -268,7 +268,7 @@ rule verify_inverted_contigs:
         sequence="genome.fasta"
     output:
         struture="structure/{resolution}/structure_verified_contigs.pdb",
-        sequence="corrected_fasta/{resolution}/genome_verified_contigs.fasta"
+        sequence="sequence/{resolution}/genome_verified_contigs.fasta"
     message:
         "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
     conda:
