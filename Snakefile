@@ -259,24 +259,44 @@ rule assign_chromosomes:
         "--output {output}"
         
 
-rule interpolate_missing_coordinates:
+rule verify_inverted_contigs:
     input:
-        "structure/{resolution}/structure_with_chr.pdb"
+        structure="structure/{resolution}/structure_with_chr.pdb",
+        sequence="genome.fasta"
     output:
-        "structure/{resolution}/structure_completed.pdb"
+        struture="structure/{resolution}/structure_verified_contigs.pdb",
+        sequence="genome_verified_contigs.fasta"
     message:
-        "Fixing missing coordinates in the 3D structure at resolution {wildcards.resolution}"
+        "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
     shell:
-        "python ../scripts/interpolate_missing_coordinates.py "
-        "--pdb {input} "
-        "--output {output}"
+        "python ../scripts/fix_inverted_contigs.py "
+        "--pdb {input.structure} "
+        "--fasta {input.sequence} "
+        "--resolution {wildcards.resolution} "
+        "--output-pdb {output.structure} "
+        "--output-fasta {output.sequence}"
+
+
+rule add_missing_beads:
+    input:
+        "structure/{resolution}/structure_verified_contigs.pdb"
+    output:
+        "structure/{resolution}/structure_completed.pdb"
+    message:
+        "Adding missing beads in the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/add_missing_beads.py "
+        "--input-pdb {input} "
+        "--output-pdb {output}"
 
 
 rule map_parameter:
     input:
-        structure="structure/{resolution}/structure_completed.pdb"
+        structure="structure/{resolution}/structure_completed.pdb",
         parameter="annotations/parameter.bedgraph"
     output:
         "structure/{resolution}/structure_with_quantitative_parameter.pdb"
