@@ -10,6 +10,9 @@ rule all:
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_with_chr.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_completed.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_with_quantitative_parameter.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_with_genes.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_completed.g3d", resolution=config["pastis_resolutions"]),
 
 
 # fasterq-dump documentation:
