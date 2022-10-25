@@ -277,7 +277,7 @@ rule interpolate_missing_coordinates:
 rule map_parameter:
     input:
         structure="structure/{resolution}/structure_completed.pdb"
-        parameter="annotations/parameter.bedgraph"
+        parameter="annotations/{resolution}/parameter.bedgraph"
     output:
         "structure/{resolution}/structure_with_quantitative_parameter.pdb"
     message:
@@ -294,7 +294,7 @@ rule map_parameter:
 rule interpolate_genes:
     input:
         structure="structure/{resolution}/structure_completed.pdb"
-        annotation="annotations/genes_anotation.bedgraph"
+        annotation="annotations/genes_annotation.bedgraph"
         sequence="genome.fasta"
     output:
         "structure/{resolution}/structure_with_genes.pdb"
