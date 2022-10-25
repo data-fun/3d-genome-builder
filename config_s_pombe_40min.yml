@@ -9,9 +9,7 @@ sra_ids:
 hicpro_restriction_sites: "^GATC"
 
 hicpro_resolutions:
-- 20000
-- 50000
+- 10000
 
 pastis_resolutions:
-- 20000
-- 50000
+- 10000

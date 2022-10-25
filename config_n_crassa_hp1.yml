@@ -7,10 +7,12 @@ sra_ids:
 - SRR2105877
 - SRR2105878
 
-hicpro_restriction_sites: "dpnii T^TAA"
+hicpro_restriction_sites: "A^AGCTT"
 
 hicpro_resolutions:
-- 20000
+- 10000
+- 50000
 
 pastis_resolutions:
-- 20000
+- 10000
+- 50000
