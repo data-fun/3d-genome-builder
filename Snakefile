@@ -284,7 +284,7 @@ rule verify_inverted_contigs:
         structure="structure/{resolution}/structure_with_chr.pdb",
         sequence="genome.fasta"
     output:
-        struture="structure/{resolution}/structure_verified_contigs.pdb",
+        structure="structure/{resolution}/structure_verified_contigs.pdb",
         sequence="sequence/{resolution}/genome_verified_contigs.fasta"
     message:
         "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
