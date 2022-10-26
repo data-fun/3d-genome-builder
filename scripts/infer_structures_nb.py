@@ -98,6 +98,8 @@ def run_pastis_nb(matrix_filename, bed_filename, output_filename, seed=0, percen
     #counts = io.load_counts(matrix_filename, base=1)
     counts_maps = pd.read_csv(matrix_filename, sep='\t', header=None)
     counts_maps = counts_maps.values
+    # to solve : File "iced/_filter_.pyx", line 15, in iced._filter_._filter_csr ValueError: Buffer dtype mismatch, expected 'DOUBLE' but got 'long'
+    counts_maps = counts_maps.astype("double")
     #counts_maps = np.load(matrix_filename)
     counts_maps[np.isnan(counts_maps)] = 0
     counts = sparse.coo_matrix(counts_maps)
