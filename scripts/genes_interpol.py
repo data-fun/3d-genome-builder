@@ -85,7 +85,7 @@ def extract_chromosome_length(fasta_name):
     return chromosome_length_lst
 
 def get_base_pair_coordinates(atoms, chromosome_lengths, HiC_resolution):
-    """Interpolate genes according to a PDB file containing a 3D genome structure.
+    """Get base pair coordinate of structure's atoms.
     
     Parameters
     ----------

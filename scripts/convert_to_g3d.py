@@ -113,28 +113,30 @@ def convert_to_g3d(pdb_name_in, chromosome_length, HiC_resolution, g3d_name_out)
     g3d_name_out : str
         Output g3d file containing the annotated 3D structure of the genome
     """
-    pdb_coordinates = PandasPdb().read_pdb(pdb_name_in)
-    print(f"Number of beads read from structure: {pdb_coordinates.df['ATOM'].shape[0]}")
-
-    beads_per_chromosome = [
-        math.ceil(length / HiC_resolution) for length in chromosome_length
-    ]
-    print(
-        f"Number of beads deduced from sequence and HiC resolution: {sum(beads_per_chromosome)}"
-    )
+    pdb = PandasPdb().read_pdb(pdb_name_in)
+    atoms = pdb.df["ATOM"]
+    print(f"Number of beads read from structure: {pdb.df['ATOM'].shape[0]}")
 
     # Deduce chromosomal position of each atoms
     bp_coordinates = list()
     for i in range(len(chromosome_length)):
         bp_coordinates_chrom_x = list(range(0, chromosome_length[i], HiC_resolution))
         bp_coordinates = bp_coordinates + bp_coordinates_chrom_x
+    
+    # Get the index of the beads without the ones already removed from the pdb file (by interpolate_missing_coordinates.py )
+    atom_number = list(atoms["atom_number"]-1)
+
+    # Delete the bp coordinates values corresponding to removed beads
+    bp_coordinates = pd.Series(bp_coordinates)
+    bp_coordinates = bp_coordinates.iloc[atom_number]
+    bp_coordinates.reset_index(drop=True, inplace=True)
 
     # Extract chromosomes and 3d coordinates information
-    g3d_data = { 'chrom': pdb_coordinates.df["ATOM"]["residue_number"],
+    g3d_data = { 'chrom': atoms["residue_number"],
                 'locus':bp_coordinates,
-                'X3D_x': pdb_coordinates.df["ATOM"]["x_coord"],
-                'X3D_y': pdb_coordinates.df["ATOM"]["y_coord"],
-                'X3D_z': pdb_coordinates.df["ATOM"]["z_coord"] }
+                'X3D_x': atoms["x_coord"],
+                'X3D_y': atoms["y_coord"],
+                'X3D_z': atoms["z_coord"] }
     result = pd.DataFrame(g3d_data)
 
     #save as g3d file
