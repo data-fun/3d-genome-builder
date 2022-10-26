@@ -192,14 +192,31 @@ rule run_HiC_Pro_on_valid_pairs:
         "HiC-Pro -i HiC-Pro/merged_samples -o HiC-Pro/merged_output -c {input.config} -s merge_persample -s build_contact_maps -s ice_norm"
 
 
-rule convert_matrix_sparse_to_dense:
+rule convert_iced_matrix_sparse_to_dense:
     input:
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
         matrix="HiC-Pro/merged_output/hic_results/matrix/merge/iced/{resolution}/merge_{resolution}_iced.matrix"
     output:
-        "dense_matrix/merge_{resolution}_dense.matrix"
+        "dense_matrix/iced/merge_{resolution}_dense.matrix"
     message:
-        "Converting sparse to dense matrix"
+        "Converting sparse to dense matrix (iced)"
+    container:
+        "../images/hicpro_3.1.0_ubuntu.img"
+    shell:
+        "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/sparseToDense.py "
+        "--bins {input.bed} "
+        "--output {output} "
+        "{input.matrix} "
+
+
+rule convert_raw_matrix_sparse_to_dense:
+    input:
+        bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
+        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_raw.matrix"
+    output:
+        "dense_matrix/raw/merge_{resolution}_dense.matrix"
+    message:
+        "Converting sparse to dense matrix (raw)"
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
     shell:
@@ -211,7 +228,7 @@ rule convert_matrix_sparse_to_dense:
 
 rule build_contact_maps:
     input:
-        "dense_matrix/merge_{resolution}_dense.matrix"
+        "dense_matrix/iced/merge_{resolution}_dense.matrix"
     output:
         "contact_maps/contact_map_{resolution}.png"
     message:
@@ -226,7 +243,7 @@ rule build_contact_maps:
 
 rule run_pastis_nb:
     input:
-        matrix="dense_matrix/merge_{resolution}_dense.matrix",
+        matrix="dense_matrix/raw/merge_{resolution}_dense.matrix",
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed"
     output:
         "pastis/structure_{resolution}.pdb"

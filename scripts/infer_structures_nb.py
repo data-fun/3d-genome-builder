@@ -104,11 +104,23 @@ def run_pastis_nb(matrix_filename, bed_filename, output_filename, seed=0, percen
     counts.setdiag(0)
     counts.eliminate_zeros()
     counts = counts.tocoo()
-    
+
+    ###############################################################################
+    # Normalize the data
+    counts = iced.filter.filter_low_counts(
+        counts, percentage=percentage_to_filter,
+        sparsity=False)
+    normed, bias = iced.normalization.ICE_normalization(
+        counts, max_iter=300,
+        output_bias=True)
+    # Save the normalization data and biases just for other purposes
+    # io.write_counts("./nb_normalized.matrix", normed)
+    # np.savetxt("./nb.biases", bias)
     random_state = np.random.RandomState(seed)
+
     ###############################################################################
     # First estimate MDS for initialization
-    X = mds.estimate_X(counts, random_state=random_state)
+    X = mds.estimate_X(normed, random_state=random_state)
     ###############################################################################
     # Estimate constant dispersion parameters
     dispersion_ = dispersion.ExponentialDispersion(degree=0)
