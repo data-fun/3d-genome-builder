@@ -212,7 +212,7 @@ rule convert_iced_matrix_sparse_to_dense:
 rule convert_raw_matrix_sparse_to_dense:
     input:
         bed="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_abs.bed",
-        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}_raw.matrix"
+        matrix="HiC-Pro/merged_output/hic_results/matrix/merge/raw/{resolution}/merge_{resolution}.matrix"
     output:
         "dense_matrix/raw/merge_{resolution}_dense.matrix"
     message:
