@@ -247,6 +247,9 @@ def flip_inverted_contigs_in_structure(
     pdb_structure = PandasPdb().read_pdb(pdb_name_in)
     coordinates = pdb_structure.df["ATOM"]
     if sum(map(len, inverted_contigs.values()))== 0:
+        pdb_structure.to_pdb(
+        path=pdb_name_out, records=None, gz=False, append_newline=True
+    )
         sys.exit("\nNothing to fix. Structure is fine.")
     print("\nFlipping contigs.")
     for chrom_num in inverted_contigs:
