@@ -316,7 +316,8 @@ def flip_inverted_contigs_in_sequence(
     if bool([a for a in inverted_contigs.values() if a == []]):
         with open(fasta_name_out, "w") as fasta_file:
             SeqIO.write(genome_fasta.values(), fasta_file, "fasta")
-        sys.exit("Nothing to fix. Sequence is fine.")
+        print("Nothing to fix. Sequence is fine.")
+        return
 
     for chrom_num in inverted_contigs:
         chrom_name = chromosome_names[chrom_num - 1]
