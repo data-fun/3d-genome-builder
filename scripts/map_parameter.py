@@ -8,10 +8,8 @@ It requires:
 """
 
 import argparse
-from symbol import atom
 import pandas as pd
 
-from Bio import SeqIO
 from biopandas.pdb import PandasPdb
 
 

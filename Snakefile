@@ -327,7 +327,7 @@ rule map_parameter:
     shell:
         "python ../scripts/map_parameter.py "
         "--pdb {input.structure} "
-        "--parameter {input.parameter}"
+        "--BedGraph {input.parameter}"
         "--output {output}"
 
 
