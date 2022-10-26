@@ -93,4 +93,4 @@ if __name__ == "__main__":
     ARGS = get_cli_arguments()
 
     # Assign chromosome number
-    map_parameter(ARGS.pdb, ARGS.annotation, ARGS.output)
+    map_parameter(ARGS.pdb, ARGS.BedGraph, ARGS.output)
