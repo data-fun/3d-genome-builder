@@ -250,7 +250,8 @@ def flip_inverted_contigs_in_structure(
         pdb_structure.to_pdb(
         path=pdb_name_out, records=None, gz=False, append_newline=True
     )
-        sys.exit("\nNothing to fix. Structure is fine.")
+        print("\nNothing to fix. Structure is fine.")
+        return
     print("\nFlipping contigs.")
     for chrom_num in inverted_contigs:
         for contig in inverted_contigs[chrom_num]:
@@ -312,6 +313,11 @@ def flip_inverted_contigs_in_sequence(
     # Flip inverted contigs in the genome sequence.
     genome_fasta = SeqIO.to_dict(SeqIO.parse(fasta_name_in, "fasta"))
 
+    if bool([a for a in inverted_contigs.values() if a == []]):
+        with open(fasta_name_out, "w") as fasta_file:
+            SeqIO.write(genome_fasta.values(), fasta_file, "fasta")
+        sys.exit("Nothing to fix. Sequence is fine.")
+
     for chrom_num in inverted_contigs:
         chrom_name = chromosome_names[chrom_num - 1]
         chrom_sequence = str(genome_fasta[chrom_name].seq)
@@ -352,7 +358,6 @@ if __name__ == "__main__":
     INVERTED_CONTIGS = find_inverted_contigs(
         ARGS.pdb, CHROMOSOME_LENGTHS, ARGS.resolution, ARGS.threshold
     )
-
     # Flip inverted contigs in the genome 3D structure and sequence.
     flip_inverted_contigs_in_structure(
         INVERTED_CONTIGS, ARGS.pdb, ARGS.output_pdb
