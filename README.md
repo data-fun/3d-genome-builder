@@ -1,4 +1,6 @@
-<img align="right" width="200px" src="assets/Neurospora_crassa_WT_50kb.gif">
+<img align="right" width="200px" 
+    src="assets/Neurospora_crassa_WT_50kb.gif"
+    alt="3D structure of the Neurospora crassa genome at 50 kb resolution">
 
 # 3D genome builder
 
