@@ -1,6 +1,7 @@
+<img align="right" width="200px" src="assets/Neurospora_crassa_WT_50kb.gif">
+
 # 3D genome builder
 
-<img align="right" width="100" src="assets/Neurospora_crassa_WT_50kb.gif">
 
 ## Download this repository
 
