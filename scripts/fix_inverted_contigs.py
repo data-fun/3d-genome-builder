@@ -81,6 +81,15 @@ def get_cli_arguments():
         required=False,
         default=False,
     )
+    # Trigger to run the script or not.
+    optional.add_argument(
+        "--run",
+        action="store",
+        choices=("True", "False"),
+        help="Run the script. Default: True.",
+        required=False,
+        default="True",
+    )
     # Add help.
     optional.add_argument(
         "-h",
@@ -349,6 +358,11 @@ def flip_inverted_contigs_in_sequence(
 if __name__ == "__main__":
     # Parse command line arguments.
     ARGS = get_cli_arguments()
+
+    if ARGS.run != "True":
+        print("Do not verify inverted contigs.")
+        print(f"Copying {ARGS.pdb} to {ARGS.output_pdb}.")
+        sys.exit()
 
     # Read Fasta file and extract chromosome names and lengths.
     CHROMOSOME_NAMES, CHROMOSOME_LENGTHS = extract_chromosome_name_length(

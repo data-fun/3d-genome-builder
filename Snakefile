@@ -281,17 +281,21 @@ rule assign_chromosomes:
 
 rule verify_inverted_contigs:
     input:
+        verify=str(config.get("verify_contigs", False)),
         structure="structure/{resolution}/structure_with_chr.pdb",
         sequence="genome.fasta"
     output:
         structure="structure/{resolution}/structure_verified_contigs.pdb",
         sequence="sequence/{resolution}/genome_verified_contigs.fasta"
+    params:
+        verify=str(config.get("verify_contigs", False))
     message:
         "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
     shell:
         "python ../scripts/fix_inverted_contigs.py "
+        "--run {params.verify} "
         "--pdb {input.structure} "
         "--fasta {input.sequence} "
         "--resolution {wildcards.resolution} "
