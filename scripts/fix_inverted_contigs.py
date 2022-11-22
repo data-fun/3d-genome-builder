@@ -86,9 +86,9 @@ def get_cli_arguments():
         "--run",
         action="store",
         choices=("True", "False"),
-        help="Run the script. Default: True.",
+        help="Run the script. Default: False.",
         required=False,
-        default="True",
+        default="False",
     )
     # Add help.
     optional.add_argument(

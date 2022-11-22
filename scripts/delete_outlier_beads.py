@@ -108,7 +108,7 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
             deleted_atoms = chromosome_df[chromosome_df["distance"] < threshold * median_distance]
             deleted_atoms = deleted_atoms.drop("distance", axis = 1)
             # Save chromosome into the full stucture.
-            ATOMS = ATOMS.append(deleted_atoms)
+            ATOMS = pd.concat([ATOMS, deleted_atoms])
 
     ATOMS.reset_index(inplace=True, drop=True)
     ATOMS["line_idx"] = ATOMS.index
