@@ -11,9 +11,7 @@ rule all:
         expand("structure/{resolution}/structure_with_chr.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_completed.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_cleaned.pdb", resolution=config["pastis_resolutions"]),
-        expand("structure/{resolution}/structure_with_quantitative_parameter.pdb", resolution=config["pastis_resolutions"]),
-        expand("structure/{resolution}/structure_with_genes.pdb", resolution=config["pastis_resolutions"]),
-        expand("structure/{resolution}/structure_completed.g3d", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_cleaned.g3d", resolution=config["pastis_resolutions"]),
 
 
 # fasterq-dump documentation:
@@ -334,49 +332,12 @@ rule delete_outlier_beads:
         "--output-pdb {output}"
 
 
-rule map_parameter:
-    input:
-        structure="structure/{resolution}/structure_cleaned.pdb",
-        parameter="annotations/{resolution}/parameter.bedgraph"
-    output:
-        "structure/{resolution}/structure_with_quantitative_parameter.pdb"
-    message:
-        "Projecting quantitative parameter on the 3D structure at resolution {wildcards.resolution}"
-    conda:
-        "envs/workflow.yml"
-    shell:
-        "python ../scripts/map_parameter.py "
-        "--pdb {input.structure} "
-        "--BedGraph {input.parameter} "
-        "--output {output}"
-
-
-rule interpolate_genes:
-    input:
-        structure="structure/{resolution}/structure_completed.pdb",
-        annotation="annotations/genes_annotation.bedgraph",
-        sequence="genome.fasta"
-    output:
-        "structure/{resolution}/structure_with_genes.pdb"
-    message:
-        "Projecting genes on the 3D structure at resolution {wildcards.resolution}"
-    conda:
-        "envs/workflow.yml"
-    shell:
-        "python ../scripts/genes_interpol.py "
-        "--pdb {input.structure} "
-        "--fasta {input.sequence} "
-        "--resolution {wildcards.resolution} "
-        "--annotation {input.annotation} "
-        "--output {output} "
-
-
 rule convert_to_g3d:
     input:
-        structure="structure/{resolution}/structure_completed.pdb",
+        structure="structure/{resolution}/structure_cleaned.pdb",
         sequence="genome.fasta"
     output:
-        "structure/{resolution}/structure_completed.g3d"
+        "structure/{resolution}/structure_cleaned.g3d"
     message:
         "Converting to g3d format"
     conda:

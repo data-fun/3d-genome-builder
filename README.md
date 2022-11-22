@@ -133,6 +133,42 @@ snakemake --profile snakemake_profile -j 4 --verbose
 
 Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
 
+## Interpolate genes into the 3D structure
+
+Build a 3D structure with one bead for each genes in a given bedgraph :
+
+```
+python ./scripts/genes_interpol.py --pdb "path/to/structure.pdb" --fasta "path/to/genome.fasta" --resolution resolution --annotation "path/to/genes.bedgraph" --output "path/to/output.pdb"
+```
+
+The gene list need to be in a bedgraph file formatted with 4 tab-separated columns (chromosome/start/stop/gene_ID):
+
+```
+1	1988	1990	NCU10129
+1	3386	3388	NCU09901
+1	9604	9606	NCU09903
+1	15930	15932	NCU11134
+1	17872	17874	NCU09904
+```
+
+## Map quantitative values to the 3D structure
+
+To add quantitative values to the structure run :
+
+```
+python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph "path/to/annotation.bedgraph" --output "path/to/output.pdb"
+```
+
+The quantitative values need to be in a bedgraph file formatted with 4 columns (chromosome/start/stop/value):
+
+```
+chr1	0	50000	116.959
+chr1	50000	100000	48.4495
+chr1	100000	150000	22.8726
+chr1	150000	200000	84.3106
+chr1	200000	250000	113.109
+```
+
 ## Example: build model for *Neurospora crassa*
 
 1. Download and prepare the reference genome sequence:
