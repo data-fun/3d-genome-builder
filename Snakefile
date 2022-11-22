@@ -10,6 +10,7 @@ rule all:
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_with_chr.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_completed.pdb", resolution=config["pastis_resolutions"]),
+        expand("structure/{resolution}/structure_cleaned.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_with_quantitative_parameter.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_with_genes.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_completed.g3d", resolution=config["pastis_resolutions"]),
@@ -318,9 +319,24 @@ rule add_missing_beads:
         "--output-pdb {output}"
 
 
+rule delete_outlier_beads:
+    input:
+        "structure/{resolution}/structure_completed.pdb"
+    output:
+        "structure/{resolution}/structure_cleaned.pdb"
+    message:
+        "Deleting outliers beads in the 3D structure at resolution {wildcards.resolution}"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/delete_outlier_beads.py "
+        "--input-pdb {input} "
+        "--output-pdb {output}"
+
+
 rule map_parameter:
     input:
-        structure="structure/{resolution}/structure_completed.pdb",
+        structure="structure/{resolution}/structure_cleaned.pdb",
         parameter="annotations/{resolution}/parameter.bedgraph"
     output:
         "structure/{resolution}/structure_with_quantitative_parameter.pdb"

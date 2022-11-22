@@ -4,7 +4,6 @@ Interpolate missing coordinates in a PDB file containing a 3D genome structure.
 """
 
 import argparse
-import pandas as pd
 
 from biopandas.pdb import PandasPdb
 
@@ -87,7 +86,7 @@ def interpolate_missing_coordinates(pdb_name_in, pdb_name_out):
         print(
             f"Removed {deleted_atoms_number} beads from chromosome {residue_number} extremities"
         )
-        # Save interpolated chromosome into the full stucture.
+        # Save interpolated chromosome into the full structure.
         atoms.loc[atoms["residue_number"] == residue_number, coord_columns] = interpolate_chromosome[coord_columns]
     # Remove in one step all beads with missing coordinates
     # located at chromosome extremities.
