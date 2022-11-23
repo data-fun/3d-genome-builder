@@ -18,4 +18,4 @@ pastis_resolutions:
 
 # Verify inverted contigs
 # Could be True or False
-verify_contig: False
+verify_contigs: False

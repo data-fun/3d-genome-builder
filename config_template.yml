@@ -12,7 +12,7 @@ sra_ids:
 - ID4
 
 # Choose appropriate restriction sites
-hicpro_restriction_sites: "dpnii T^TAA"
+hicpro_restriction_sites: "T^TAA"
 
 # Choose appropriate resolution
 hicpro_resolutions:
@@ -28,4 +28,4 @@ pastis_resolutions:
 
 # Verify inverted contigs
 # Could be True or False
-verify_contig: False
+verify_contigs: False
