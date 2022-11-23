@@ -1,0 +1,17 @@
+workdir: "3d_genome_n_crassa_WT"
+
+organism: "Neurospora crassa"
+
+sra_ids:
+- SRR2105869
+- SRR2105870
+- SRR2105871
+- SRR2105872
+
+hicpro_restriction_sites: "A^AGCTT"
+
+hicpro_resolutions:
+- 50000
+
+pastis_resolutions:
+- 50000

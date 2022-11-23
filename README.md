@@ -171,25 +171,9 @@ chr1	150000	200000	84.3106
 chr1	200000	250000	113.109
 ```
 
-## Examples: build model for *Neurospora crassa*
+## Examples
 
-1. Download and prepare the reference genome sequence:
-
-    ```bash
-    bash prepare_n_crassa_genome.sh
-    ```
-
-2. Copy parameters from [config_n_crassa.yml](config_n_crassa.yml):
-
-    ```bash
-    cp config_n_crassa.yml config.yml
-    ```
-
-3. Run the 3D model construction:
-
-    ```bash
-    snakemake --profile snakemake_profile -j 4
-    ```
+- [Build wild type model for *Neurospora crassa*](examples/n_crassa.md)
 
 ## Build DAG graph
 
