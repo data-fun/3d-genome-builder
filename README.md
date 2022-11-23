@@ -53,7 +53,7 @@ Load conda environment:
 conda activate 3d-genome-builder
 ```
 
-## Download  HiC-Pro Singularity image
+### Download  HiC-Pro Singularity image
 
 
 ```bash
@@ -76,15 +76,17 @@ $ singularity exec images/hicpro_3.1.0_ubuntu.img bowtie2 --version  2>/dev/null
 ```
 
 
-## Create the config file
+## Prepare required files
+
+### Create the config file
 
 Create and edit a configuration file in [yaml](https://en.wikipedia.org/wiki/YAML) format. See for instance the template `config_template.yml`
 
-## Add reference genome
+### Add the reference genome
 
 The reference genome fasta file must be located in `WORKING_DIR/genome.fasta` where `WORKING_DIR` is the name of the working directory as specified in your config file.
 
-## Add FASTQ files (optional)
+### Add FASTQ files (optional)
 
 If you already have fastq files stored locally or some fastq files are not available on GEO or SRA, you can use these files providing they are in the proper directory structure:
 
@@ -132,6 +134,8 @@ snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml --verbose
 ```
 
 Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
+
+For troubleshooting, have a look to log files in `WORKING_DIR/logs`, where `WORKING_DIR` is the name of the working directory as specified in your config file.
 
 ## Interpolate genes into the 3D structure
 
