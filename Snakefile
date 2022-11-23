@@ -1,8 +1,9 @@
 import os
 
 ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
-
-workdir: f"{config['workdir'].replace(' ', '_')}"
+WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
+print(f"WORING_DIR: {WORKING_DIR}")
+workdir: WORKING_DIR
 
 rule all:
     input:
@@ -26,12 +27,12 @@ rule download_fastq_files:
         loglevel="info"
     threads:
         2
-    log:
-        "logs/fasterq-dump_{sra_id}.log"
     message:
         "Downloading {wildcards.sra_id} files"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/fasterq-dump_{sra_id}.log"
     shell: 
         "fasterq-dump {wildcards.sra_id} --threads {threads} --log-level {params.loglevel} "
         "{params.progress} --outdir {params.outdir} >{log} 2>&1 "
@@ -55,15 +56,15 @@ rule compress_fastq_files:
         "fastq_files/{sra_id}/{sra_id}_R{paired}.fastq.gz"
     threads:
         4
-    log:
-        "logs/pigz_{sra_id}_R{paired}.log"
     message:
         "Compressing {input}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/pigz_{sra_id}_R{paired}.log"
     shell: 
         # pigz is the parallel implementation of gzip
-        "pigz -p {threads} {input}"
+        "pigz -p {threads} {input} >{log} 2>&1"
 
 
 rule calculate_chromosome_sizes:
@@ -86,12 +87,12 @@ rule digest_genome:
         "genome.fasta"
     output:
         "HiC-Pro/restriction_sites.txt"
-    log:
-        "logs/digest_genome.log"
     message:
         "Generating list of restriction fragments"
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
+    log:
+        "logs/digest_genome.log"
     shell:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py "
         "-r {config[hicpro_restriction_sites]} "
@@ -107,12 +108,12 @@ rule build_genome_index:
         "genome.fasta"
     output:
         "HiC-Pro/bowtie2_index/genome.1.bt2"
-    log:
-        "logs/build_genome_index.log"
     message:
         "Building genome index"
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
+    log:
+        "logs/build_genome_index.log"
     shell:
         "bowtie2-build {input} HiC-Pro/bowtie2_index/genome >{log} 2>&1"
 
@@ -149,8 +150,14 @@ rule run_HiC_Pro:
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
     threads: 8
+    log:
+        "logs/run_HiC_Pro.log"
     shell:
-        "LC_ALL=C; echo 'y' | HiC-Pro -i fastq_files -o HiC-Pro/output -c {input.config}"
+        "LC_ALL=C; echo 'y' | HiC-Pro "
+        "-i fastq_files "
+        "-o HiC-Pro/output "
+        "-c {input.config} "
+        ">{log} 2>&1 "
     # LC_ALL=C prevents warning messages on locale settings
     # /usr/bin/bash: warning: setlocale: LC_ALL: cannot change locale (fr_FR.UTF-8)
     # echo 'y' automatically valids answer to
@@ -187,8 +194,17 @@ rule run_HiC_Pro_on_valid_pairs:
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
     threads: 8
+    log:
+        "logs/run_HiC_Pro_on_valid_pairs.log"
     shell:
-        "HiC-Pro -i HiC-Pro/merged_samples -o HiC-Pro/merged_output -c {input.config} -s merge_persample -s build_contact_maps -s ice_norm"
+        "HiC-Pro "
+        "-i HiC-Pro/merged_samples "
+        "-o HiC-Pro/merged_output "
+        "-c {input.config} "
+        "-s merge_persample "
+        "-s build_contact_maps "
+        "-s ice_norm "
+        ">{log} 2>&1 "
 
 
 rule convert_iced_matrix_sparse_to_dense:
@@ -201,11 +217,14 @@ rule convert_iced_matrix_sparse_to_dense:
         "Converting sparse to dense matrix (iced)"
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
+    log:
+        "logs/convert_iced_matrix_{resolution}.log"
     shell:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/sparseToDense.py "
         "--bins {input.bed} "
         "--output {output} "
         "{input.matrix} "
+        ">{log} 2>&1 "
 
 
 rule convert_raw_matrix_sparse_to_dense:
@@ -218,14 +237,17 @@ rule convert_raw_matrix_sparse_to_dense:
         "Converting sparse to dense matrix (raw)"
     container:
         "../images/hicpro_3.1.0_ubuntu.img"
+    log:
+        "logs/convert_raw_matrix_{resolution}.log"
     shell:
         "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/sparseToDense.py "
         "--bins {input.bed} "
         "--output {output} "
         "{input.matrix} "
+        ">{log} 2>&1 "
 
 
-rule build_contact_maps:
+rule build_contact_map:
     input:
         "dense_matrix/iced/merge_{resolution}_dense.matrix"
     output:
@@ -234,10 +256,13 @@ rule build_contact_maps:
         "Assembling contact maps"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/build_contact_map_{resolution}.log"
     shell:
         "python ../scripts/build_contact_maps.py "
         "--contacts {input} "
-        "--map {output}"
+        "--map {output} "
+        ">{log} 2>&1 "
 
 
 rule run_pastis_nb:
@@ -251,7 +276,7 @@ rule run_pastis_nb:
     conda:
         "envs/workflow.yml"
     log:
-        "logs/pastis_nb_{resolution}.log"
+        "logs/run_pastis_nb_{resolution}.log"
     shell:
         "python ../scripts/infer_structures_nb.py "
         "--matrix {input.matrix} "
@@ -271,7 +296,7 @@ rule assign_chromosomes:
     conda:
         "envs/workflow.yml"
     log:
-        "logs/assign_chr_{resolution}.log"
+        "logs/assign_chromosomes_{resolution}.log"
     shell:
         "python ../scripts/assign_chromosomes.py "
         "--pdb {input.structure} "
