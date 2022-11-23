@@ -4,6 +4,8 @@
 
 # 3D genome builder
 
+3d genome builder (3GDB) is a integrated solution to build genome 3D models from HiC raw data and visually integrate omics data on them.
+3DGB bundles HiC-Pro and Pastis-nb with additional PDB output file formatting steps into a unified Snakemake workflow with limited input (see *Preparing Required Files*) and unified results in an html output file.
 
 ## Download this repository
 
@@ -137,9 +139,27 @@ Depending on the number and size of fastq files, the 3D construction will take a
 
 For troubleshooting, have a look to log files in `WORKING_DIR/logs`, where `WORKING_DIR` is the name of the working directory as specified in your config file.
 
-## Interpolate genes into the 3D structure
+## Map quantitative values to the 3D model
 
-Build a 3D structure with one bead for each genes in a given bedgraph :
+To add quantitative values to the model run :
+
+```
+python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph path/to/annotation.bedgraph --output path/to/output.pdb
+```
+
+The quantitative values need to be in a bedgraph file formatted with 4 columns (chromosome/start/stop/value):
+
+```
+chr1	0	50000	116.959
+chr1	50000	100000	48.4495
+chr1	100000	150000	22.8726
+chr1	150000	200000	84.3106
+chr1	200000	250000	113.109
+```
+
+## Interpolate genes into the 3D model
+
+Build a 3D model with one bead for each genes in a given bedgraph :
 
 ```
 python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/genome.fasta --resolution HiC-resolution --annotation path/to/genes.bedgraph --output path/to/output.pdb
@@ -155,24 +175,6 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 1	9604	9606	NCU09903
 1	15930	15932	NCU11134
 1	17872	17874	NCU09904
-```
-
-## Map quantitative values to the 3D structure
-
-To add quantitative values to the structure run :
-
-```
-python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph path/to/annotation.bedgraph --output path/to/output.pdb
-```
-
-The quantitative values need to be in a bedgraph file formatted with 4 columns (chromosome/start/stop/value):
-
-```
-chr1	0	50000	116.959
-chr1	50000	100000	48.4495
-chr1	100000	150000	22.8726
-chr1	150000	200000	84.3106
-chr1	200000	250000	113.109
 ```
 
 ## Examples
