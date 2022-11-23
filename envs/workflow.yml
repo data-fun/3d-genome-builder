@@ -1,4 +1,4 @@
-name: 3d-genome-builder-workflow
+name: 3DGB-workflow
 # channels priority
 # see https://bioconda.github.io/
 # conda-forge has highest priority
@@ -23,7 +23,8 @@ dependencies:
   - pandas
   # Pastis
   - scikit-learn
-  # Iced: https://github.com/hiclib/iced
+  # Iced
+  # https://github.com/hiclib/iced
   # https://pypi.org/project/iced/
   - iced
   # Python library to read fasta files
@@ -31,6 +32,7 @@ dependencies:
   # Python library to read pdb files
   - biopandas
   - pip:
+    # Pastis
     # https://github.com/hiclib/pastis
     # https://pypi.org/project/pastis/
     - pastis==0.4.0
