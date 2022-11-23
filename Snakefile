@@ -270,12 +270,15 @@ rule assign_chromosomes:
         "Assigning chromosomes to the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/assign_chr_{resolution}.log"
     shell:
         "python ../scripts/assign_chromosomes.py "
         "--pdb {input.structure} "
         "--fasta {input.sequence} "
         "--resolution {wildcards.resolution} "
-        "--output {output}"
+        "--output {output} "
+        ">{log} 2>&1 "
         
 
 rule verify_inverted_contigs:
@@ -291,6 +294,8 @@ rule verify_inverted_contigs:
         "Fix inverted contigs (if needed) in the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/verify_inverted_contigs_{resolution}.log"
     shell:
         "python ../scripts/verify_inverted_contigs.py "
         "--run {params.verify} "
@@ -298,7 +303,8 @@ rule verify_inverted_contigs:
         "--fasta {input.sequence} "
         "--resolution {wildcards.resolution} "
         "--output-pdb {output.structure} "
-        "--output-fasta {output.sequence}"
+        "--output-fasta {output.sequence} "
+        ">{log} 2>&1 "
 
 
 rule add_missing_beads:
@@ -310,10 +316,13 @@ rule add_missing_beads:
         "Adding missing beads in the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/add_missing_beads_{resolution}.log"
     shell:
         "python ../scripts/add_missing_beads.py "
         "--input-pdb {input} "
-        "--output-pdb {output}"
+        "--output-pdb {output} "
+        ">{log} 2>&1 "
 
 
 rule delete_outlier_beads:
@@ -325,10 +334,13 @@ rule delete_outlier_beads:
         "Deleting outliers beads in the 3D structure at resolution {wildcards.resolution}"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/delete_outlier_beads_{resolution}.log"
     shell:
         "python ../scripts/delete_outlier_beads.py "
         "--input-pdb {input} "
-        "--output-pdb {output}"
+        "--output-pdb {output} "
+        ">{log} 2>&1 "
 
 
 rule convert_to_g3d:
@@ -341,12 +353,15 @@ rule convert_to_g3d:
         "Converting to g3d format"
     conda:
         "envs/workflow.yml"
+    log:
+        "logs/convert_to_g3d_{resolution}.log"
     shell:
         "python ../scripts/convert_to_g3d.py "
         "--pdb {input.structure} "
         "--fasta {input.sequence} "
         "--resolution {wildcards.resolution} "
-        "--output {output}"
+        "--output {output} "
+        ">{log} 2>&1 "
 
 
 rule clean:
