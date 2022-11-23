@@ -25,3 +25,7 @@ hicpro_resolutions:
 pastis_resolutions:
 - 50000
 - 40000
+
+# Verify inverted contigs
+# Could be True or False
+verify_contig: False

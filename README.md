@@ -76,13 +76,13 @@ $ singularity exec images/hicpro_3.1.0_ubuntu.img bowtie2 --version  2>/dev/null
 ```
 
 
-## Add parameters
+## Create the config file
 
-Create and edit the configuration file `config.yml` in yaml format. See for instance `config_template.yml`
+Create and edit a configuration file in [yaml](https://en.wikipedia.org/wiki/YAML) format. See for instance the template `config_template.yml`
 
 ## Add reference genome
 
-The reference genome fasta file must be located in `WORKING_DIR/genome.fasta` where `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
+The reference genome fasta file must be located in `WORKING_DIR/genome.fasta` where `WORKING_DIR` is the name of the working directory as specified in your config file.
 
 ## Add FASTQ files (optional)
 
@@ -106,8 +106,8 @@ WORKING_DIR/
 ├── genome.fasta
 ```
 
-- `WORKING_DIR` is the name of the working directory as specified in the config file `config.yml`.
-- Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file (`config.yml`). Please note fastq files have to follow the pattern `<sample ID>_R<1 or 2>.fastq.gz`.
+- `WORKING_DIR` is the name of the working directory as specified in your config file.
+- Paired-end fastq files are in the directory `WORKING_DIR/fastq_files/IDx` with `IDx` the identifier of the paired fastq files. Fastq identifiers are reported in the config file. Please note fastq files have to follow the pattern `<sample ID>_R<1 or 2>.fastq.gz`.
 
 > **Note**
 >
@@ -118,17 +118,17 @@ WORKING_DIR/
 Run 3D model construction:
 
 ```bash
-snakemake --profile snakemake_profile -j 4
+snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml
 ```
 
 > **Note**
->
-> Option `-j 4` tells Snakemake to use up to 4 cores. If you are more cores available, you can increase this value (*e.g.* `-j 16`).
+> - Adapt `YOUR-CONFIG.yml` to the exact name of the config file you created.
+> - Option `-j 4` tells Snakemake to use up to 4 cores. If you are more cores available, you can increase this value (*e.g.* `-j 16`).
 
 Or with debugging options:
 
 ```bash
-snakemake --profile snakemake_profile -j 4 --verbose
+snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml --verbose
 ```
 
 Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
@@ -138,8 +138,10 @@ Depending on the number and size of fastq files, the 3D construction will take a
 Build a 3D structure with one bead for each genes in a given bedgraph :
 
 ```
-python ./scripts/genes_interpol.py --pdb "path/to/structure.pdb" --fasta "path/to/genome.fasta" --resolution resolution --annotation "path/to/genes.bedgraph" --output "path/to/output.pdb"
+python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/genome.fasta --resolution HiC-resolution --annotation path/to/genes.bedgraph --output path/to/output.pdb
 ```
+
+Please adapt `path/to/structure.pdb`, `path/to/genome.fasta`, `HiC-resolution`, `path/to/genes.bedgraph` and `path/to/output.pdb` to your own settings.
 
 The gene list need to be in a bedgraph file formatted with 4 tab-separated columns (chromosome/start/stop/gene_ID):
 
@@ -156,7 +158,7 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 To add quantitative values to the structure run :
 
 ```
-python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph "path/to/annotation.bedgraph" --output "path/to/output.pdb"
+python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph path/to/annotation.bedgraph --output path/to/output.pdb
 ```
 
 The quantitative values need to be in a bedgraph file formatted with 4 columns (chromosome/start/stop/value):
@@ -169,7 +171,7 @@ chr1	150000	200000	84.3106
 chr1	200000	250000	113.109
 ```
 
-## Example: build model for *Neurospora crassa*
+## Examples: build model for *Neurospora crassa*
 
 1. Download and prepare the reference genome sequence:
 
