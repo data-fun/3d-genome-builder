@@ -11,6 +11,7 @@ This script requires:
 import argparse
 import math
 from operator import invert
+import shutil
 import sys
 
 from Bio import SeqIO
@@ -362,6 +363,9 @@ if __name__ == "__main__":
     if ARGS.run != "True":
         print("Do not verify inverted contigs.")
         print(f"Copying {ARGS.pdb} to {ARGS.output_pdb}.")
+        shutil.copyfile(ARGS.pdb, ARGS.output_pdb)
+        print(f"Copying {ARGS.fasta} to {ARGS.output_fasta}.")
+        shutil.copyfile(ARGS.fasta, ARGS.output_fasta)
         sys.exit()
 
     # Read Fasta file and extract chromosome names and lengths.

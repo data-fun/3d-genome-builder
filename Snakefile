@@ -292,7 +292,7 @@ rule verify_inverted_contigs:
     conda:
         "envs/workflow.yml"
     shell:
-        "python ../scripts/fix_inverted_contigs.py "
+        "python ../scripts/verify_inverted_contigs.py "
         "--run {params.verify} "
         "--pdb {input.structure} "
         "--fasta {input.sequence} "
