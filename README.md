@@ -4,8 +4,8 @@
 
 # 3D genome builder
 
-3d genome builder (3GDB) is a integrated solution to build genome 3D models from HiC raw data and visually integrate omics data on them.
-3DGB bundles HiC-Pro and Pastis-nb with additional PDB output file formatting steps into a unified Snakemake workflow with limited input (see *Preparing Required Files*) and unified results in an html output file.
+3D genome builder (3GDB) is a complete solution to build genome 3D models from HiC raw data and to integrate omics data on these models for further visual exploration.
+3DGB bundles HiC-Pro ([paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [code](https://github.com/nservant/HiC-Pro)), PASTIS ([paper](https://academic.oup.com/bioinformatics/article/30/12/i26/385087), [code](https://github.com/hiclib/pastis)) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D modeles of genome in the PDB format and an HTML report.
 
 ## Download this repository
 
