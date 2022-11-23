@@ -280,7 +280,6 @@ rule assign_chromosomes:
 
 rule verify_inverted_contigs:
     input:
-        verify=str(config.get("verify_contigs", False)),
         structure="structure/{resolution}/structure_with_chr.pdb",
         sequence="genome.fasta"
     output:
