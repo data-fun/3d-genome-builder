@@ -1,4 +1,4 @@
-workdir: "3d_genome_n_crassa_WT"
+workdir: "3DGB_n_crassa_WT"
 
 organism: "Neurospora crassa"
 
@@ -15,3 +15,7 @@ hicpro_resolutions:
 
 pastis_resolutions:
 - 50000
+
+# Verify inverted contigs
+# Could be True or False
+verify_contig: False
