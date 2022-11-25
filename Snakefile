@@ -2,7 +2,7 @@ import os
 
 ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
 WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
-print(f"WORING_DIR: {WORKING_DIR}")
+
 workdir: WORKING_DIR
 
 rule all:
