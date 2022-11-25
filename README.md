@@ -186,12 +186,14 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
 
 ```bash
-snakemake --profile snakemake_profile --rulegraph  | dot -Tpdf > rules.pdf
+snakemake --profile smk_profile --configfile YOUR-CONFIG.yml --rulegraph  | dot -Tpdf > rules.pdf
 ```
+
+where `YOUR-CONFIG.yml` should be replaced by the name of the config file you created.
 
 With wildcards:
 
 ```bash
-snakemake --profile snakemake_profile --dag  | dot -Tpdf > dag.pdf
+snakemake --profile smk_profile --configfile YOUR-CONFIG.yml --dag  | dot -Tpdf > dag.pdf
 ```
 
