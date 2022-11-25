@@ -4,8 +4,8 @@
 
 # 3D genome builder
 
-3d genome builder (3GDB) is a integrated solution to build genome 3D models from HiC raw data and visually integrate omics data on them.
-3DGB bundles HiC-Pro and Pastis-nb with additional PDB output file formatting steps into a unified Snakemake workflow with limited input (see *Preparing Required Files*) and unified results in an html output file.
+3D genome builder (3GDB) is a complete solution to build genome 3D models from HiC raw data and to integrate omics data on these models for further visual exploration.
+3DGB bundles HiC-Pro ([paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [code](https://github.com/nservant/HiC-Pro)), PASTIS ([paper](https://academic.oup.com/bioinformatics/article/30/12/i26/385087), [code](https://github.com/hiclib/pastis)) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D modeles of genome in the PDB format and an HTML report.
 
 ## Download this repository
 
@@ -186,12 +186,14 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
 
 ```bash
-snakemake --profile snakemake_profile --rulegraph  | dot -Tpdf > rules.pdf
+snakemake --profile smk_profile --configfile YOUR-CONFIG.yml --rulegraph  | dot -Tpdf > rules.pdf
 ```
+
+where `YOUR-CONFIG.yml` should be replaced by the name of the config file you created.
 
 With wildcards:
 
 ```bash
-snakemake --profile snakemake_profile --dag  | dot -Tpdf > dag.pdf
+snakemake --profile smk_profile --configfile YOUR-CONFIG.yml --dag  | dot -Tpdf > dag.pdf
 ```
 
