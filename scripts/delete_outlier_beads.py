@@ -112,7 +112,7 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
 
     ATOMS.reset_index(inplace=True, drop=True)
     ATOMS["line_idx"] = ATOMS.index
-    print(f"Found {atoms.shape[0]} beads after removal of outlier beads.")
+    print(f"Found {ATOMS.shape[0]} beads after removal of outlier beads.")
 
     pdb.df["ATOM"] = ATOMS
     pdb.to_pdb(pdb_name_out)
