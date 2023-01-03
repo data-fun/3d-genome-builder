@@ -15,6 +15,7 @@ rule all:
         expand("structure/{resolution}/structure_cleaned.g3d", resolution=config["pastis_resolutions"]),
 
 
+# Donwload fastq files.
 # fasterq-dump documentation:
 # https://github.com/ncbi/sra-tools/wiki/HowTo:-fasterq-dump
 rule download_fastq_files:
@@ -38,6 +39,7 @@ rule download_fastq_files:
         "{params.progress} --outdir {params.outdir} >{log} 2>&1 "
 
 
+# Rename fastq files to be compatible with HiC-Pro.
 rule rename_paired_fastq_files:
     input:
         "fastq_files/{sra_id}/{sra_id}_{paired}.fastq"
@@ -49,6 +51,7 @@ rule rename_paired_fastq_files:
         "mv {input} {output}"
 
 
+# Compress fastq files to gain some space.
 rule compress_fastq_files:
     input:
         "fastq_files/{sra_id}/{sra_id}_R{paired}.fastq"
@@ -67,6 +70,7 @@ rule compress_fastq_files:
         "pigz -p {threads} {input} >{log} 2>&1"
 
 
+# Calculate chromosome sizes from the genome sequence.
 rule calculate_chromosome_sizes:
     input:
         "genome.fasta"
@@ -80,6 +84,8 @@ rule calculate_chromosome_sizes:
         "logs/calculate_chromosome_sizes.log"
     shell:
         "python ../scripts/calculate_chromosome_sizes.py "
+        "--fasta {input} "
+        "--output {output} "
         ">{log} 2>&1 "
 
 
