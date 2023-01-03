@@ -15,7 +15,7 @@ bash examples/n_crassa_prepare_genome.sh
 snakemake --profile smk_profile -j 4 --configfile examples/n_crassa_WT.yml
 ```
 
-See output files: `3DGB_n_crassa_WT/structure/*/structure_cleaned.pdb`.
+See output file `3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb` that should be equivalent to `./examples/structure_cleaned.pdb`.
 
 ## Map ChipSeq values to the 3D model
 
@@ -23,4 +23,4 @@ See output files: `3DGB_n_crassa_WT/structure/*/structure_cleaned.pdb`.
 python scripts/map_parameter.py --pdb "./3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb" --BedGraph "./examples/n_crassa.bedgraph" --output "./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb"
 ```
 
-See output file : `./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb`.
+See output file `./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb` that should be equivalent to `./examples/structure_with_parameter.pdb`.
