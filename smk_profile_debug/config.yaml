@@ -5,5 +5,6 @@ use-singularity: True
 keep-going: True
 rerun-incomplete: True
 show-failed-logs: True
-printshellcmds: False
-reason: False
+printshellcmds: True
+reason: True
+stats: stats.json
