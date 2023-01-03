@@ -15,7 +15,7 @@ bash examples/n_crassa_prepare_genome.sh
 snakemake --profile smk_profile -j 4 --configfile examples/n_crassa_WT.yml
 ```
 
-See output file : `structure_cleaned.pdb`.
+See output files: `3DGB_n_crassa_WT/structure/*/structure_cleaned.pdb`.
 
 ## Map ChipSeq values to the 3D model
 
