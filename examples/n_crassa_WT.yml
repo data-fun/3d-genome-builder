@@ -12,9 +12,11 @@ hicpro_restriction_sites: "A^AGCTT"
 
 hicpro_resolutions:
 - 50000
+- 30000
 
 pastis_resolutions:
 - 50000
+- 30000
 
 # Verify inverted contigs
 # Could be True or False
