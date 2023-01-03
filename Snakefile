@@ -7,6 +7,7 @@ workdir: WORKING_DIR
 
 rule all:
     input:
+        "HiC-Pro/config.txt",
         expand("contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_with_chr.pdb", resolution=config["pastis_resolutions"]),
@@ -111,7 +112,7 @@ rule digest_genome:
 
 
 # Build genome index
-# with bowtie provided with HiC-Pro
+# with bowtie provided with HiC-Pro.
 rule build_genome_index:
     input:
         "genome.fasta"
@@ -127,6 +128,7 @@ rule build_genome_index:
         "bowtie2-build {input} HiC-Pro/bowtie2_index/genome >{log} 2>&1"
 
 
+# Create HiC-Pro configuration file.
 rule create_HiC_Pro_config:
     input:
         template="../templates/HiC-Pro_config.template",
@@ -141,10 +143,20 @@ rule create_HiC_Pro_config:
         "Building HiC-Pro configuration file"
     conda:
         "envs/workflow.yml"
-    script:
-        "scripts/create_HiC_Pro_config.py"
+    log:
+        "logs/create_HiC_Pro_config.log"
+    shell:
+        "python ../scripts/create_HiC_Pro_config.py "
+        "--template {input.template} "
+        "--chromosome-sizes {input.chromosome_sizes} "
+        "--genome-fragment {input.genome_fragment} "
+        "--genome-index-path {params.genome_index_path} "
+        "--resolutions {params.resolutions} "
+        "--output {output} "
+        ">{log} 2>&1"
 
 
+# Run HiC-Pro
 rule run_HiC_Pro:
     input:
         config="HiC-Pro/config.txt",
@@ -186,6 +198,7 @@ rule copy_HiC_Pro_valid_pairs:
         "cp {input} {output}"
 
 
+# Run HiC-Pro on merged valid pairs.
 rule run_HiC_Pro_on_valid_pairs:
     input:
         config="HiC-Pro/config.txt",
@@ -398,6 +411,5 @@ rule convert_to_g3d:
         ">{log} 2>&1 "
 
 
-rule clean:
-    shell:
-        "rm -rf logs HiC-Pro dense_matrix pastis"
+onsuccess:
+    print("WORKFLOW COMPLETED SUCCESSFULLY!")
