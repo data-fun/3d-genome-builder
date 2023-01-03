@@ -76,8 +76,11 @@ rule calculate_chromosome_sizes:
         "Calculating chromosome sizes"
     conda:
         "envs/workflow.yml"
-    script:
-        "scripts/calculate_chromosome_sizes.py"
+    log:
+        "logs/calculate_chromosome_sizes.log"
+    shell:
+        "python ../scripts/calculate_chromosome_sizes.py "
+        ">{log} 2>&1 "
 
 
 # Generate the list of restriction fragments
