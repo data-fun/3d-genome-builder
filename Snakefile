@@ -5,8 +5,11 @@ WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
 
 workdir: WORKING_DIR
 
+#  Main rule to generate all result files.
 rule all:
     input:
+        "logs/environment_conda.log",
+        "logs/environment_singularity.log",
         "HiC-Pro/config.txt",
         expand("contact_maps/contact_map_{resolution}.png", resolution=config["hicpro_resolutions"]),
         expand("pastis/structure_{resolution}.pdb", resolution=config["pastis_resolutions"]),
@@ -14,6 +17,39 @@ rule all:
         expand("structure/{resolution}/structure_completed.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_cleaned.pdb", resolution=config["pastis_resolutions"]),
         expand("structure/{resolution}/structure_cleaned.g3d", resolution=config["pastis_resolutions"]),
+
+
+# Extract versions of Python modules and tools from conda environment.
+rule describe_conda_env:
+    priority: 50
+    output:
+        "logs/environment_conda.log"
+    message:
+        "Extracting information from conda environment"
+    conda:
+        "envs/workflow.yml"
+    shell:
+        "python ../scripts/describe_conda_env.py >{output} &&"
+        "fasterq-dump --version >>{output} &&"
+        "pigz --version >>{output} "
+
+
+# Extract versions of tools from singularity container.
+rule describe_singularity_env:
+    priority: 51
+    output:
+        "logs/environment_singularity.log"
+    message:
+        "Extracting information from singularity container"
+    container:
+        "../images/hicpro_3.1.0_ubuntu.img"
+    shell:
+        "/usr/local/bin/HiC-Pro_3.1.0/bin/utils/digest_genome.py --help >{output} && "
+        "printf '\n\n\n' >>{output} && "
+        "bowtie2-build --version >>{output} &&"
+        "printf '\n\n\n' >>{output} && "
+        "LC_ALL=C; HiC-Pro --version >>{output} "
+
 
 
 # Donwload fastq files.

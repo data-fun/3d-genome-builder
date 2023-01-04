@@ -37,3 +37,6 @@ dependencies:
     # https://github.com/hiclib/pastis
     # https://pypi.org/project/pastis/
     - pastis==0.4.0
+    # Watermark
+    # https://github.com/rasbt/watermark
+    - watermark
