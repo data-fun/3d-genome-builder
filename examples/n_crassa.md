@@ -15,14 +15,14 @@ bash examples/n_crassa_prepare_genome.sh
 snakemake --profile smk_profile -j 4 --configfile examples/n_crassa_WT.yml
 ```
 
-See output file `3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb` that should be equivalent to `./examples/structure_cleaned.pdb`.
+See output file `3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb` that should be equivalent to `examples/structure_cleaned.pdb`.
 
 Without taking into account the time to download fastq files, the 3D genome models generation should take about 30 minutes with 4 Intel i7-8665U cores at 1.90 GHz.
 
 ## Map ChipSeq values to the 3D model
 
 ```bash
-python scripts/map_parameter.py --pdb "./3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb" --BedGraph "./examples/n_crassa.bedgraph" --output "./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb"
+python scripts/map_parameter.py --pdb "3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb" --BedGraph "examples/n_crassa.bedgraph" --output "3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb"
 ```
 
-See output file `./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb` that should be equivalent to `./examples/structure_with_parameter.pdb`.
+See output file `./3DGB_n_crassa_WT/structure/50000/structure_with_parameter.pdb` that should be equivalent to `examples/structure_with_parameter.pdb`.
