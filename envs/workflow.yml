@@ -16,8 +16,6 @@ dependencies:
   - sra-tools
   # pigz: parallel implementation of gzip
   - pigz
-  # Python library to read fasta files
-  - biopython
   # Create HiC-Pro config file with template
   - jinja2
   # Pastis config file
