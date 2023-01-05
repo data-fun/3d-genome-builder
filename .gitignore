@@ -4,6 +4,7 @@
 # directories to build genome
 3d_*
 3DGB*
+tmp*
 
 # singularity images
 images/*
