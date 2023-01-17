@@ -1,4 +1,4 @@
-""" Build 3D structure of genome with Pastis NB.
+""" Build 3D structure of genome with Pastis-NB.
 
 This script by Nelle Varoqaux et Thibault Poinsignon
 is a modified version of the one in this pull request:
