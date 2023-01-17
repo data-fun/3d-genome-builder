@@ -18,8 +18,6 @@ dependencies:
   - pigz
   # Create HiC-Pro config file with template
   - jinja2
-  # Pastis config file
-  - pandas
   # Pastis
   - scikit-learn
   # Iced
