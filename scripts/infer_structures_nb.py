@@ -1,8 +1,8 @@
 """ Build 3D structure of genome with Pastis NB.
 
-This script is a modified version of:
-https://github.com/Thibault-Poinsignon/pastisnb/blob/main/scripts/generated_data/infer_structures_nb.py
-by Nelle Varoqaux et Thibault Poinsignon
+This script by Nelle Varoqaux et Thibault Poinsignon
+is a modified version of the one in this pull request:
+https://github.com/NelleV/pastisnb/pull/8
 """
 
 import argparse
