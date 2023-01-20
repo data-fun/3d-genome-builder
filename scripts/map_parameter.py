@@ -96,6 +96,7 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
     # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column
     atoms["b_factor"] = quantitative_parameter["value"]
 
+    # Write the PDB file.
     pdb.df["ATOM"] = atoms
     pdb.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
     print(f"Wrote {pdb_name_out}")
