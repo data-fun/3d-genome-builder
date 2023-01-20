@@ -1,10 +1,11 @@
 """Annotate a PDB file containing a 3D genome structure with a quantitative parameter.
 
+This parameter could be issued from ChIP-Seq experiment for example.
+
 It requires:
-- a PDB file containing the genome structure,
-- a fasta file containing the genome sequence,
-- a BedGraph file containning the quantitative parameter,
-- a resolution.
+- a PDB file with the genome structure,
+- a bedGraph file with the quantitative parameter,
+  see https://genome.ucsc.edu/goldenPath/help/bedgraph.html.
 """
 
 import argparse
@@ -26,61 +27,74 @@ def get_cli_arguments():
         "--pdb",
         action="store",
         type=str,
-        help="PDB file containing the 3D structure of the genome",
+        help="PDB file with the 3D structure of the genome",
         required=True,
     )
     parser.add_argument(
         "--BedGraph",
         action="store",
         type=str,
-        help="BedGraph file containing the quantitative parameter",
+        help="BedGraph file with the quantitative parameter",
         required=True,
     )
     parser.add_argument(
         "--output",
         action="store",
         type=str,
-        help="Output PDB file containing the annotated 3D structure of the genome",
+        help="Output PDB file with the annotated 3D structure of the genome",
         required=True,
     )
     return parser.parse_args()
 
 
-def map_parameter(pdb_name_in, BedGraph, pdb_name_out):
-    """Assign a quantitative parameter to the whole genome 3D structure.
+def normalize_parameter(values, max_value=999):
+    """Normalize the quantitative parameter values.
 
-    Note:
-    - The PDB file produced by Pastis is not readable by Biopython
-    because the residue number column is missing.
-    - We use instead the biopandas library. http://rasbt.github.io/biopandas/
+    B factors values should be between 0 and 999.99.
+
+    We normalize the values between 0 and max_value,
+    only if the max value is above max_value.
+    """
+    if max(values) > max_value:
+        values = values / max(values) * max_value
+    return values
+
+
+def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
+    """Assign a quantitative parameter to the whole genome 3D structure.
 
     Parameters
     ----------
     pdb_name_in : str
-        PDB file containing the 3D structure of the genome
-    BedGraph : str
-        BedGraph file containing the annotation of a quantitative parameter
-    HiC_resolution : int
-        HiC resolution
+        PDB file with the 3D structure of the genome
+    bedgraph_name : str
+        BedGraph file with a quantitative parameter
     pdb_name_out : str
-        Output PDB file containing the annotated 3D structure of the genome
+        Output PDB file with the annotated 3D structure of the genome
     """
-
+    # Read the PDB file.
     pdb = PandasPdb().read_pdb(pdb_name_in)
     print(f"Number of beads read from structure: {pdb.df['ATOM'].shape[0]}")
     atoms = pdb.df["ATOM"]
-    quantitative_parameter = pd.read_csv(BedGraph, sep="\t", header=None)
 
-    # Get the index of the beads without the ones already removed from the pdb file (by interpolate_missing_coordinates.py )
-    atom_number = list(atoms["atom_number"]-1)
+    # Read the bedGraph file.
+    quantitative_parameter = pd.read_csv(bedgraph_name, sep="\t", header=None)
+    quantitative_parameter.columns =["chromosome", "start", "end", "value"]
 
-    # Delete the quantitative parameter values corresponding to removed beads
+    # Get the index of the beads.
+    # Having deleted missing is not an issue.
+    atom_number = list(atoms["atom_number"] - 1)
+
+    # Delete the quantitative parameter values corresponding to deleted beads.
     quantitative_parameter = quantitative_parameter.iloc[atom_number]
     quantitative_parameter.reset_index(drop=True, inplace=True)
 
+    # Normalize the quantitative parameter values,
+    # only is max value is above 999.
+    quantitative_parameter["value"] = normalize_parameter(quantitative_parameter["value"])
+
     # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column
-    #TODO ajouter la normalisation pour les valeurs au dessus de 999.99
-    atoms["b_factor"]=quantitative_parameter[3]
+    atoms["b_factor"] = quantitative_parameter["value"]
 
     pdb.df["ATOM"] = atoms
     pdb.to_pdb(path=pdb_name_out, records=None, gz=False, append_newline=True)
