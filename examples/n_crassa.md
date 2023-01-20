@@ -17,7 +17,7 @@ snakemake --profile smk_profile -j 4 --configfile examples/n_crassa_WT.yml
 
 See output file `3DGB_n_crassa_WT/structure/50000/structure_cleaned.pdb` that should be equivalent to `examples/structure_cleaned.pdb`.
 
-Without taking into account the time to download fastq files, the 3D genome models generation should take about 30 minutes with 4 Intel i7-8665U cores at 1.90 GHz.
+Without taking into account the time to download fastq files, the 3D genome models generation should take about 40 minutes with 4 Intel i7-8665U cores at 1.90 GHz.
 
 ## Map ChipSeq values to the 3D model
 
