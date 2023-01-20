@@ -1,10 +1,10 @@
 """Annotate a PDB file containing a 3D genome structure with a quantitative parameter.
 
-This parameter could be issued from ChIP-Seq experiment for example.
+This parameter could be issued from ChIP-Seq experiment for instance.
 
 It requires:
 - a PDB file with the genome structure,
-- a bedGraph file with the quantitative parameter,
+- a bedGraph file with the quantitative parameter in the last column,
   see https://genome.ucsc.edu/goldenPath/help/bedgraph.html.
 """
 
@@ -50,7 +50,7 @@ def get_cli_arguments():
 def normalize_parameter(values, max_value=999):
     """Normalize the quantitative parameter values.
 
-    B factors values should be between 0 and 999.99.
+    B factors values must be between 0 and 999.99.
 
     We normalize the values between 0 and max_value,
     only if the max value is above max_value.
@@ -61,7 +61,7 @@ def normalize_parameter(values, max_value=999):
 
 
 def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
-    """Assign a quantitative parameter to the whole genome 3D structure.
+    """Assign a quantitative parameter to a genome 3D structure.
 
     Parameters
     ----------
@@ -79,7 +79,7 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
 
     # Read the bedGraph file.
     quantitative_parameter = pd.read_csv(bedgraph_name, sep="\t", header=None)
-    quantitative_parameter.columns =["chromosome", "start", "end", "value"]
+    quantitative_parameter.columns = ["chromosome", "start", "end", "value"]
 
     # Get the index of the beads.
     # Having deleted missing is not an issue.
@@ -91,9 +91,11 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
 
     # Normalize the quantitative parameter values,
     # only is max value is above 999.
-    quantitative_parameter["value"] = normalize_parameter(quantitative_parameter["value"])
+    quantitative_parameter["value"] = normalize_parameter(
+        quantitative_parameter["value"]
+    )
 
-    # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column
+    # Map the quantitative parameter values to the corresponding beads, in the "b_factor" pdb column.
     atoms["b_factor"] = quantitative_parameter["value"]
 
     # Write the PDB file.
@@ -104,6 +106,4 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
-
-    # Assign chromosome number
     map_parameter(ARGS.pdb, ARGS.BedGraph, ARGS.output)
