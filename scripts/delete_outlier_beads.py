@@ -72,7 +72,6 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
 
     # delete outlier coordinates chromosome by chromosome.
     for residue_number in atoms["residue_number"].unique():
-        
         # Select beads of one chromosome
         chromosome_df = atoms.query(
             f"residue_number == {residue_number}"
@@ -83,6 +82,7 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
             chromosome_df[coord_columns].to_numpy() - chromosome_df[coord_columns].shift(-1).to_numpy(),
             axis=1
         )
+        chromosome_df.loc[chromosome_df.index[-1], "distance"] = chromosome_df.loc[chromosome_df.index[-2], "distance"]
 
         # Compute median distance with possible Nan values
         median_distance = chromosome_df["distance"].median(skipna=True)
@@ -92,28 +92,27 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
         # i.e. the beads with the greater ditances.
         # Output beads coordinates with distances
         outlier_beads = (
-            chromosome_df["distance"] > threshold * median_distance
+            chromosome_df["distance"] >= threshold * median_distance
         )
 
         if not outlier_beads.sum():
             print(f"Chromosome {residue_number} has no outlier beads")
             chromosome_df = chromosome_df.drop("distance", axis = 1)
             # Save chromosome into the full stucture.
-            ATOMS = ATOMS.append(chromosome_df)
+            ATOMS = pd.concat([ATOMS, chromosome_df])
 
         else:
-            # Print number of outlier beads that will later remove.
+            # Print number of outlier beads that will be later removed.
             print(f"Chromosome {residue_number} has {outlier_beads.sum()} outlier beads")
-
-            deleted_atoms = chromosome_df[chromosome_df["distance"] < threshold * median_distance]
-            deleted_atoms = deleted_atoms.drop("distance", axis = 1)
+            deleted_atoms = chromosome_df[chromosome_df["distance"] >= threshold * median_distance]
+            print(deleted_atoms[["record_name", "atom_number", "atom_name", "residue_name", "residue_number", "x_coord", "y_coord", "z_coord", "distance"]])
+            kept_atoms = chromosome_df[chromosome_df["distance"] < threshold * median_distance]
+            kept_atoms = kept_atoms.drop("distance", axis = 1)
             # Save chromosome into the full stucture.
-            ATOMS = pd.concat([ATOMS, deleted_atoms])
-
+            ATOMS = pd.concat([ATOMS, kept_atoms])
     ATOMS.reset_index(inplace=True, drop=True)
     ATOMS["line_idx"] = ATOMS.index
     print(f"Found {ATOMS.shape[0]} beads after removal of outlier beads.")
-
     pdb.df["ATOM"] = ATOMS
     pdb.to_pdb(pdb_name_out)
     print(f"Wrote {pdb_name_out}")
