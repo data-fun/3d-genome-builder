@@ -82,7 +82,9 @@ def delete_outlier_beads(pdb_name_in, pdb_name_out, threshold):
             chromosome_df[coord_columns].to_numpy() - chromosome_df[coord_columns].shift(-1).to_numpy(),
             axis=1
         )
-        chromosome_df.loc[chromosome_df.index[-1], "distance"] = chromosome_df.loc[chromosome_df.index[-2], "distance"]
+        # The last distance is Nan because there is no bead n+1 for the last bead.
+        # We replace it by the distance between bead n and bead n-1.
+        chromosome_df.iloc[-1]["distance"] = chromosome_df.iloc[-2]["distance"]
 
         # Compute median distance with possible Nan values
         median_distance = chromosome_df["distance"].median(skipna=True)
