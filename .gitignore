@@ -24,3 +24,6 @@ dag.pdf
 # and temp notebooks
 .ipynb_checkpoints/
 Untitled*.ipynb
+
+# Python cache
+__pycache__/
