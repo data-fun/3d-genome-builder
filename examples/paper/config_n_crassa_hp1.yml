@@ -1,0 +1,18 @@
+workdir: "3DGB_n_crassa_hp1"
+
+organism: "Neurospora crassa"
+
+sra_ids:
+- SRR2105876
+- SRR2105877
+- SRR2105878
+
+hicpro_restriction_sites: "A^AGCTT"
+
+hicpro_resolutions:
+- 50000
+
+pastis_resolutions:
+- 50000
+
+verify_contigs: False

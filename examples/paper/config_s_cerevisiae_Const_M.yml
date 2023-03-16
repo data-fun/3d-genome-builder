@@ -1,0 +1,17 @@
+workdir: "3DGB_s_cerevisiae_Const_M"
+
+organism: "Saccharomyces cerevisiae"
+
+sra_ids:
+- SRR11893084
+- SRR11893085
+
+hicpro_restriction_sites:
+
+hicpro_resolutions:
+- 5000
+
+pastis_resolutions:
+- 5000
+
+verify_contigs: False

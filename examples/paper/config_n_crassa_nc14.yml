@@ -1,0 +1,23 @@
+workdir: "3d_genome_n_crassa_nc14"
+
+organism: "Neurospora crassa"
+
+sra_ids:
+- SRR14362684
+- SRR14362685
+- SRR16761088
+- SRR16761089
+- SRR16761090
+- SRR16761091
+- SRR16761092
+
+hicpro_restriction_sites: "dpnii T^TAA"
+
+hicpro_resolutions:
+- 10000
+
+pastis_resolutions:
+- 10000
+
+verify_contigs: False
+

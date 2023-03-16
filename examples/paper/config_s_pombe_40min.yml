@@ -1,0 +1,18 @@
+workdir: "3d_genome_s_pombe_40min"
+
+organism: "Schizosaccharomyces pombe"
+
+sra_ids:
+- SRR5149255
+- SRR5149256
+
+hicpro_restriction_sites: "^GATC"
+
+hicpro_resolutions:
+- 10000
+
+pastis_resolutions:
+- 10000
+
+verify_contigs: False
+
