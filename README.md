@@ -2,7 +2,7 @@
     src="assets/Neurospora_crassa_WT_50kb.gif"
     alt="3D structure of the Neurospora crassa genome at 50 kb resolution">
 
-# 3D genome builder
+# 3D genome builder (3DGB)
 
 3D genome builder (3GDB) is a complete solution to build genome 3D models from HiC raw data and to integrate omics data on these models for further visual exploration.
 3DGB bundles HiC-Pro ([paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [code](https://github.com/nservant/HiC-Pro)), PASTIS ([paper](https://academic.oup.com/bioinformatics/article/30/12/i26/385087), [code](https://github.com/hiclib/pastis)) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D modeles of genome in the PDB format and an HTML report.
@@ -204,7 +204,7 @@ The following paths contain the most interesting results:
 ## Examples
 
 - [Wild type model for *Neurospora crassa*](examples/n_crassa.md)
-- [Parameters of all models built in the 3DGB paper](examples/paper/paper.md)
+- [Models built in the 3DGB paper](examples/paper/paper.md)
 
 # Visualize structures of the 3D models
 
