@@ -177,28 +177,23 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 1	17872	17874	NCU09904
 ```
 
+## Get results
+
+The following paths contain the most interesting results:
+
+- `WORKING_DIR/contact_maps/*.png` : contact maps.
+- `WORKING_DIR/HiC-Pro/output/hic_results/pic/*/*.pdf` : Hi-C Pro graphical summaries of read alignments.
+- `WORKING_DIR/contact_maps/*.png` : contact maps.
+- `WORKING_DIR/structure/*/structure_cleaned.*` : final 3D models in PDB and G3D format.
+
 ## Examples
 
 - [Build wild type model for *Neurospora crassa*](examples/n_crassa.md)
+- [Parameters of all models build in the 3DGB paper](examples/paper/paper.md)
 
+# Visualize structures of the 3D models
 
-## Get results
-
-The contact maps, the Hi-C Pro graphical summaries of read alignments, the Pastis 3D models and the final 3D models files are in the respective following folders:
-```
-WORKING_DIR/
-├── contact_maps
-├──HiC-Pro
-	│├──output
-	│	├── hic_results
-	│	│	├── pics
-├── pastis
-├── structures
-```
-
-# Visualize the 3D structure
-
-To easily visualize the 3D structures, follow the quick mol* tutorial in the visualization folder.
+To visualize the structures of the 3D models, follow this quick [tutorial](visualization/visualization.md).
 
 
 ## Build DAG graph
