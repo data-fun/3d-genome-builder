@@ -179,7 +179,7 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 
 ## Get results
 
-Upon completion, the `WORKING_DIR` content should look like this:
+Upon completion, the `WORKING_DIR` should look like this:
 
 ```
 WORKING_DIR/
@@ -203,8 +203,8 @@ The following paths contain the most interesting results:
 
 ## Examples
 
-- [Build wild type model for *Neurospora crassa*](examples/n_crassa.md)
-- [Parameters of all models build in the 3DGB paper](examples/paper/paper.md)
+- [Wild type model for *Neurospora crassa*](examples/n_crassa.md)
+- [Parameters of all models built in the 3DGB paper](examples/paper/paper.md)
 
 # Visualize structures of the 3D models
 

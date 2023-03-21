@@ -2,11 +2,11 @@
 
 ## Saccharomyces cerevisiae
 
-Genome sequence: <SCERE_genome_chromosomes_only.fasta>
+Genome sequence: [SCERE_genome_chromosomes_only.fasta](SCERE_genome_chromosomes_only.fasta)
 
 Configuration files:
-- WT sample: <config_s_cerevisiae_Const_M.yml>
-- mcd1 depleted sample: <config_s_cerevisiae_Const_mcd1.yml>
+- [WT sample](config_s_cerevisiae_Const_M.yml)
+- [mcd1 depleted sample](config_s_cerevisiae_Const_mcd1.yml)
 
 ## Schizosaccharomyces pombe
 
