@@ -181,6 +181,26 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 
 - [Build wild type model for *Neurospora crassa*](examples/n_crassa.md)
 
+
+## Get results
+
+The contact maps, the Hi-C Pro graphical summaries of read alignments, the Pastis 3D models and the final 3D models files are in the respective following folders:
+```
+WORKING_DIR/
+├── contact_maps
+├──HiC-Pro
+	│├──output
+	│	├── hic_results
+	│	│	├── pics
+├── pastis
+├── structures
+```
+
+# Visualize the 3D structure
+
+To easily visualize the 3D structures, follow the quick mol* tutorial in the visualization folder.
+
+
 ## Build DAG graph
 
 For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
