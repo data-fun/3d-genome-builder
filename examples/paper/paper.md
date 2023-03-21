@@ -1,16 +1,16 @@
 # Parameters of the models built in the 3DGB paper
 
-## Saccharomyces cerevisiae
+## *Saccharomyces cerevisiae*
 
-Genome sequence: [SCERE_genome_chromosomes_only.fasta](SCERE_genome_chromosomes_only.fasta)
+[Genome sequence](SCERE_genome_chromosomes_only.fasta)
 
 Configuration files:
 - [WT sample](config_s_cerevisiae_Const_M.yml)
 - [mcd1 depleted sample](config_s_cerevisiae_Const_mcd1.yml)
 
-## Schizosaccharomyces pombe
+## *Schizosaccharomyces pombe*
 
-Genome sequence: <SPOMB_genome_chromosomes_only.fasta>
+[Genome sequence](SPOMB_genome_chromosomes_only.fasta)
 
 Configuration files for the 8 samples (X minutes after G2 synchronisation):
 - [20 min](config_s_pombe_20min.yml)
@@ -22,7 +22,7 @@ Configuration files for the 8 samples (X minutes after G2 synchronisation):
 - [80 min](config_s_pombe_80min.yml)
 - [120 min](config_s_pombe_120min.yml)
 
-## Neurospora crassa
+## *Neurospora crassa*
 
 [Genome sequence](NCRAS_genome_chromosomes_only.fasta)
 
