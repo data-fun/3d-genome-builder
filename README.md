@@ -206,9 +206,9 @@ The following paths contain the most interesting results:
 - [Wild type model for *Neurospora crassa*](examples/n_crassa.md)
 - [Models built in the 3DGB paper](examples/paper/paper.md)
 
-# Visualize structures of the 3D models
+## Visualize 3D model structures
 
-To visualize the structures of the 3D models, follow this quick [tutorial](visualization/visualization.md).
+To visualize 3D model structure, follow this quick [tutorial](visualization/visualization.md).
 
 
 ## Build DAG graph
