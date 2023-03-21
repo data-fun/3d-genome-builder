@@ -179,12 +179,27 @@ The gene list need to be in a bedgraph file formatted with 4 tab-separated colum
 
 ## Get results
 
+Upon completion, the `WORKING_DIR` content should look like this:
+
+```
+WORKING_DIR/
+├── contact_maps
+├── dense_matrix
+├── fastq_files
+├── HiC-Pro
+├── logs
+├── pastis
+├── sequence
+└── structure
+```
+
 The following paths contain the most interesting results:
 
 - `WORKING_DIR/contact_maps/*.png` : contact maps.
 - `WORKING_DIR/HiC-Pro/output/hic_results/pic/*/*.pdf` : Hi-C Pro graphical summaries of read alignments.
 - `WORKING_DIR/contact_maps/*.png` : contact maps.
 - `WORKING_DIR/structure/*/structure_cleaned.*` : final 3D models in PDB and G3D format.
+
 
 ## Examples
 
