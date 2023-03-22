@@ -1,5 +1,7 @@
 # Parameters of the models built in the 3DGB paper
 
+3D models (in PDB format) and animated gifs are avaialble on [Zenodo](https://doi.org/10.5281/zenodo.7740302).
+
 ## *Saccharomyces cerevisiae*
 
 [Genome sequence](SCERE_genome_chromosomes_only.fasta)
@@ -28,7 +30,7 @@ Configuration files for the 8 samples (X minutes after G2 synchronisation):
 
 Configuration files:
 - WT samples:
-	- [config_n_crassa_nc14.yml]() (data from [Rodriguez et al. 2022](https://pubmed.ncbi.nlm.nih.gov/35244156/))
-	- [config_n_crassa_WT.yml]() (data from [Galazka et al. 2016](https://pubmed.ncbi.nlm.nih.gov/27260477/))
+	- [config_n_crassa_nc14.yml](config_n_crassa_nc14.yml) (data from [Rodriguez et al. 2022](https://pubmed.ncbi.nlm.nih.gov/35244156/))
+	- [config_n_crassa_WT.yml](config_n_crassa_WT.yml) (data from [Galazka et al. 2016](https://pubmed.ncbi.nlm.nih.gov/27260477/))
 - [hp0 mutant sample](config_n_crassa_hp1.yml)
 

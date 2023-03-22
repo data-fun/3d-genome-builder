@@ -4,8 +4,8 @@
 
 # 3D genome builder (3DGB)
 
-3D genome builder (3GDB) is a complete solution to build genome 3D models from HiC raw data and to integrate omics data on these models for further visual exploration.
-3DGB bundles HiC-Pro ([paper](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [code](https://github.com/nservant/HiC-Pro)), PASTIS ([paper](https://academic.oup.com/bioinformatics/article/30/12/i26/385087), [code](https://github.com/hiclib/pastis)) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D modeles of genome in the PDB format and an HTML report.
+3D genome builder (3DGB) is a workflow to build 3D models of genomes from HiC raw data and to integrate omics data on the produced models for further visual exploration.
+3DGB bundles [HiC-Pro](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [PASTIS](https://academic.oup.com/bioinformatics/article/30/12/i26/385087) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D models of genome in PDB and G3D formats.
 
 ## Download this repository
 
@@ -141,13 +141,13 @@ For troubleshooting, have a look to log files in `WORKING_DIR/logs`, where `WORK
 
 ## Map quantitative values to the 3D model
 
-To add quantitative values to the model run :
+To add quantitative values to the model run:
 
 ```
-python ./scripts/map_parameter.py --pdb "path/to/structure.pdb" --BedGraph path/to/annotation.bedgraph --output path/to/output.pdb
+python ./scripts/map_parameter.py --pdb path/to/structure.pdb --bedgraph path/to/annotation.bedgraph --output path/to/output.pdb
 ```
 
-The quantitative values need to be in a bedgraph file formatted with 4 columns (chromosome/start/stop/value):
+Quantitative values should be formatted in a 4-column bedgraph file (chromosome/start/stop/value):
 
 ```
 chr1	0	50000	116.959
@@ -159,7 +159,7 @@ chr1	200000	250000	113.109
 
 ## Interpolate genes into the 3D model
 
-Build a 3D model with one bead for each genes in a given bedgraph :
+Build a 3D model with one bead for each genes in a given bedgraph:
 
 ```
 python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/genome.fasta --resolution HiC-resolution --annotation path/to/genes.bedgraph --output path/to/output.pdb
@@ -167,7 +167,7 @@ python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/g
 
 Please adapt `path/to/structure.pdb`, `path/to/genome.fasta`, `HiC-resolution`, `path/to/genes.bedgraph` and `path/to/output.pdb` to your own settings.
 
-The gene list need to be in a bedgraph file formatted with 4 tab-separated columns (chromosome/start/stop/gene_ID):
+The gene list should be formatted in a 4-column bedgraph file (chromosome/start/stop/gene_ID):
 
 ```
 1	1988	1990	NCU10129
@@ -197,18 +197,21 @@ The following paths contain the most interesting results:
 
 - `WORKING_DIR/contact_maps/*.png` : contact maps.
 - `WORKING_DIR/HiC-Pro/output/hic_results/pic/*/*.pdf` : Hi-C Pro graphical summaries of read alignments.
-- `WORKING_DIR/pastis/*.pdb` : Pastis outputs, 3D models in PDB format.
-- `WORKING_DIR/structure/*/structure_cleaned.*` : final 3D models in PDB and G3D format.
+- `WORKING_DIR/pastis/structure_RESOLUTION.pdb` : raw 3D models produced by Pastis in PDB format.
+- `WORKING_DIR/structure/RESOLUTION/structure_cleaned.*` : final (annotated) 3D models in PDB and G3D formats.
 
+> **Note**
+> - `WORKING_DIR` is the name of the working directory as specified in your config file.
+> - `RESOLUTION` is the resolution of the Hi-C data specified in the config file.
 
 ## Examples
 
 - [Wild type model for *Neurospora crassa*](examples/n_crassa.md)
-- [Models built in the 3DGB paper](examples/paper/paper.md)
+- [Models built for the 3DGB paper](examples/paper/paper.md)
 
 ## Visualize 3D model structures
 
-To visualize 3D model structure, follow this quick [tutorial](visualization/visualization.md).
+To visualize 3D model structures, follow this quick [tutorial](visualization/visualization.md).
 
 
 ## Build DAG graph
