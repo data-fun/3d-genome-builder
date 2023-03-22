@@ -159,25 +159,6 @@ chr1	200000	250000	113.109
 
 Each bead of the model will be assigned a quantitative value. The resolution in the bedgraph file should match the resolution used to build the model.
 
-## Interpolate genes into the 3D model
-
-Build a 3D model with one bead for each genes in a given bedgraph:
-
-```
-python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/genome.fasta --resolution HiC-resolution --annotation path/to/genes.bedgraph --output path/to/output.pdb
-```
-
-Please adapt `path/to/structure.pdb`, `path/to/genome.fasta`, `HiC-resolution`, `path/to/genes.bedgraph` and `path/to/output.pdb` to your own settings.
-
-The gene list should be formatted in a 4-column bedgraph file (chromosome/start/stop/gene_ID):
-
-```
-1	1988	1990	NCU10129
-1	3386	3388	NCU09901
-1	9604	9606	NCU09903
-1	15930	15932	NCU11134
-1	17872	17874	NCU09904
-```
 
 ## Get results
 
