@@ -161,7 +161,7 @@ Each bead of the model will be assigned a quantitative value. The resolution in 
 
 ## Interpolate genes into the 3D model
 
-Build a 3D model with one bead for each genes in a given bedgraph:
+Build a 3D model with one bead for each gene:
 
 ```
 python ./scripts/genes_interpol.py --pdb path/to/structure.pdb --fasta path/to/genome.fasta --resolution HiC-resolution --annotation path/to/genes.bedgraph --output path/to/output.pdb
