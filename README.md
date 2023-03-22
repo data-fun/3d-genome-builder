@@ -115,7 +115,7 @@ WORKING_DIR/
 
 > **Note**
 >
-> Please strictly follow this file organization as it is later expected by the 3DGB workflow.
+> Please strictly follow this file organization as it is required by the 3DGB workflow.
 
 ## Build model
 
@@ -132,7 +132,7 @@ snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml
 Or with debugging options:
 
 ```bash
-snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml --verbose
+snakemake --profile smk_profile_debug -j 4 --configfile YOUR-CONFIG.yml --verbose
 ```
 
 Depending on the number and size of fastq files, the 3D construction will take a couple of hours to run.
