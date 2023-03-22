@@ -29,10 +29,10 @@ The manual of Mol* is available [here](https://molstar.org/viewer-docs/).
 
 The manual of HiC3D-Viewer is available [here](https://github.com/mohamed-amine-guerras/HiC3DViewer/blob/master/hicViewer/static/data/UserManual.pdf).
 
-1 To load the 3D model, click on "Select file" from the "Upload 3D model" left menu. Select your .g3d file, then click on "Submit". After the model import, select the model in the "Load built model" menu then click "OK". 
+1. To load the 3D model, click on "Select file" from the "Upload 3D model" left menu. Select your .g3d file, then click on "Submit". Once the model is uploaded, select the model in the "Load built model" menu then click "OK". 
 
 ![](HiC3D-1.png)
 
-2 To change chromosome colors and thickness or hide axes, use the right menu.
+2. To change chromosome colors and thickness or hide axes, use the right menu.
 
 ![](HiC3D-2.png)
