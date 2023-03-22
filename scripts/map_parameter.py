@@ -4,7 +4,7 @@ This parameter could be issued from ChIP-Seq experiment for instance.
 
 It requires:
 - a PDB file with the genome structure,
-- a bedGraph file with the quantitative parameter in the last column,
+- a Bedgraph file with a quantitative parameter in the last column,
   see https://genome.ucsc.edu/goldenPath/help/bedgraph.html.
 """
 
@@ -31,10 +31,10 @@ def get_cli_arguments():
         required=True,
     )
     parser.add_argument(
-        "--BedGraph",
+        "--bedgraph",
         action="store",
         type=str,
-        help="BedGraph file with the quantitative parameter",
+        help="Bedgraph file with the quantitative parameter",
         required=True,
     )
     parser.add_argument(
@@ -68,7 +68,7 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
     pdb_name_in : str
         PDB file with the 3D structure of the genome
     bedgraph_name : str
-        BedGraph file with a quantitative parameter
+        Bedgraph file with a quantitative parameter
     pdb_name_out : str
         Output PDB file with the annotated 3D structure of the genome
     """
@@ -106,4 +106,4 @@ def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
 
 if __name__ == "__main__":
     ARGS = get_cli_arguments()
-    map_parameter(ARGS.pdb, ARGS.BedGraph, ARGS.output)
+    map_parameter(ARGS.pdb, ARGS.bedgraph, ARGS.output)
