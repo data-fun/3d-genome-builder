@@ -139,9 +139,9 @@ Depending on the number and size of fastq files, the 3D construction will take a
 
 For troubleshooting, have a look to log files in `WORKING_DIR/logs`, where `WORKING_DIR` is the name of the working directory as specified in your config file.
 
-## Map quantitative values to the 3D model
+## Map quantitative values on the 3D model
 
-To add quantitative values to the model run:
+To map quantitative values on the model run:
 
 ```
 python ./scripts/map_parameter.py --pdb path/to/structure.pdb --bedgraph path/to/annotation.bedgraph --output path/to/output.pdb
@@ -156,6 +156,8 @@ chr1	100000	150000	22.8726
 chr1	150000	200000	84.3106
 chr1	200000	250000	113.109
 ```
+
+Each bead of the model will be assigned a quantitative value. The resolution in the bedgraph file should match the resolution used to build the model.
 
 ## Interpolate genes into the 3D model
 
@@ -211,12 +213,12 @@ The following paths contain the most interesting results:
 
 ## Visualize 3D model structures
 
-To visualize 3D model structures, follow this quick [tutorial](visualization/visualization.md).
+To visualize 3D model structures (.pdb and .g3d files), follow this quick [tutorial](visualization/visualization.md).
 
 
 ## Build DAG graph
 
-For visualisation purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
+For visualization purpose, you can build the graph of all computational steps involved in the 3D construction of the genome.
 
 ```bash
 snakemake --profile smk_profile --configfile YOUR-CONFIG.yml --rulegraph  | dot -Tpdf > rules.pdf
