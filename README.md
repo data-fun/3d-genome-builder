@@ -107,7 +107,7 @@ WORKING_DIR/
 │   └── ID4
 │       ├── ID4_R1.fastq.gz
 │       └── ID4_R2.fastq.gz
-├── genome.fasta
+└── genome.fasta
 ```
 
 - `WORKING_DIR` is the name of the working directory as specified in your config file.
@@ -115,11 +115,11 @@ WORKING_DIR/
 
 > **Note**
 >
-> Please strictly follow this file organization as it is later expected by the 3D model construction workflow.
+> Please strictly follow this file organization as it is later expected by the 3DGB workflow.
 
 ## Build model
 
-Run 3D model construction:
+Run 3DGB:
 
 ```bash
 snakemake --profile smk_profile -j 4 --configfile YOUR-CONFIG.yml
@@ -143,7 +143,7 @@ For troubleshooting, have a look to log files in `WORKING_DIR/logs`, where `WORK
 
 To map quantitative values on the model run:
 
-```
+```bash
 python ./scripts/map_parameter.py --pdb path/to/structure.pdb --bedgraph path/to/annotation.bedgraph --output path/to/output.pdb
 ```
 
