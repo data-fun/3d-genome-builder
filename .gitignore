@@ -20,8 +20,11 @@ scripts/HiCPlotter.py
 rules.pdf
 dag.pdf
 
+# Python cache
+__pycache__/
+
 # Jupyter checkpoints
-# and temp notebooks
+# and temporary notebooks
 .ipynb_checkpoints/
 Untitled*.ipynb
 
