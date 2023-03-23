@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Stop a first error or with an unset variable.
+# Stop at first error or with an unset variable.
 set -euo pipefail
 
 confirm() {
