@@ -1,3 +1,5 @@
+[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/data-fun/3d-genome-builder/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/data-fun/3d-genome-builder)
+
 <img align="right" width="200px" 
     src="assets/Neurospora_crassa_WT_50kb.gif"
     alt="3D structure of the Neurospora crassa genome at 50 kb resolution">
