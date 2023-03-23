@@ -179,8 +179,8 @@ WORKING_DIR/
 The following paths contain the most interesting results:
 
 - `WORKING_DIR/contact_maps/*.png` : contact maps.
-- `WORKING_DIR/HiC-Pro/output/hic_results/pic/*/*.pdf` : Hi-C Pro graphical summaries of read alignments.
-- `WORKING_DIR/pastis/structure_RESOLUTION.pdb` : raw 3D models produced by Pastis in PDB format.
+- `WORKING_DIR/HiC-Pro/output/hic_results/pic/*/*.pdf` : graphical summaries of read alignments produced by Hi-C Pro.
+- `WORKING_DIR/pastis/structure_RESOLUTION.pdb` : raw 3D models (in PDB format) produced by Pastis.
 - `WORKING_DIR/structure/RESOLUTION/structure_cleaned.*` : final (annotated) 3D models in PDB and G3D formats.
 
 > **Note**
