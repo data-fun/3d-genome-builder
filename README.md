@@ -93,6 +93,10 @@ The reference genome fasta file must be located in `WORKING_DIR/genome.fasta` wh
 
 If you already have fastq files stored locally or some fastq files are not available on GEO or SRA, you can use these files providing they are in the proper directory structure:
 
+<img align="right" width="200px" 
+    src="assets/SCERE_chromosome_13.gif"
+    alt="3D structure of the chromosome 13 of S. cerevisiae at 5 kb resolution">
+
 ```
 WORKING_DIR/
 ├── fastq_files
