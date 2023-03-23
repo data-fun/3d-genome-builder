@@ -1,0 +1,77 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/BSD-3-Clause",
+    "codeRepository": "https://github.com/data-fun/3d-genome-builder",
+    "dateCreated": "2022-04-07",
+    "datePublished": "2022-04-07",
+    "name": "3DGB",
+    "description": "3D genome builder",
+    "applicationCategory": "Biology",
+    "funding": "ANR-19-CE45-0017",
+    "funder": {
+        "@type": "Organization",
+        "name": "Agence Nationale de la Recherche"
+    },
+    "keywords": [
+        "HiC",
+        "chromatine structure",
+        "fungal genomes",
+        "3D model",
+        "workflow",
+        "HiC-Pro",
+        "Pastis"
+    ],
+    "programmingLanguage": [
+        "Python"
+    ],
+    "operatingSystem": [
+        "Linux"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-5079-5417",
+            "givenName": "Thibault",
+            "familyName": "Poinsignon",
+            "email": "thibault.poinsignon@protonmail.com",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Institute for Integrative Biology of the Cell (I2BC), CEA, CNRS, Université ParisSaclay, 91198 Gif‑sur‑Yvette, France"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-2431-7825",
+            "givenName": "Mélina",
+            "familyName": "Gallopin",
+            "email": "melina.gallopin@universite-paris-saclay.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Institute for Integrative Biology of the Cell (I2BC), CEA, CNRS, Université ParisSaclay, 91198 Gif‑sur‑Yvette, France"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0002-2842-6172",
+            "givenName": "Gaëlle",
+            "familyName": "Lelandais",
+            "email": "gaelle.lelandais@universite-paris-saclay.fr",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Institute for Integrative Biology of the Cell (I2BC), CEA, CNRS, Université ParisSaclay, 91198 Gif‑sur‑Yvette, France"
+            }
+        },
+        {
+            "@type": "Person",
+            "@id": "https://orcid.org/0000-0003-4177-3619",
+            "givenName": "Pierre",
+            "familyName": "Poulain",
+            "email": "pierre.poulain@cupnet.net",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Université Paris Cité, CNRS, Institut Jacques Monod, F-75013 Paris, France"
+            }
+        }
+    ]
+}
