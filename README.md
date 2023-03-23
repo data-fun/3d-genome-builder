@@ -1,5 +1,3 @@
-[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/data-fun/3d-genome-builder/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/data-fun/3d-genome-builder)
-
 <img align="right" width="200px" 
     src="assets/Neurospora_crassa_WT_50kb.gif"
     alt="3D structure of the Neurospora crassa genome at 50 kb resolution">
@@ -9,6 +7,7 @@
 3D genome builder (3DGB) is a workflow to build 3D models of genomes from HiC raw data and to integrate omics data on the produced models for further visual exploration.
 3DGB bundles [HiC-Pro](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-015-0831-x), [PASTIS](https://academic.oup.com/bioinformatics/article/30/12/i26/385087) and custom Python scripts into a unified Snakemake workflow with limited inputs (see *Preparing Required Files*). 3DGB produces annotated 3D models of genome in PDB and G3D formats.
 
+[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/data-fun/3d-genome-builder/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/data-fun/3d-genome-builder)
 ## Download this repository
 
 ```bash
