@@ -1,0 +1,34 @@
+name: 3DGB-dev
+# channels priority
+# see https://bioconda.github.io/
+# conda-forge has highest priority
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - python=3.10
+  # Data analysis
+  - pandas
+  - scipy
+  - matplotlib
+  - jupyterlab
+  # Snakemake
+  - snakemake-minimal
+  # Build DAG with Snakemake
+  - graphviz
+  # Code formating
+  - black
+  - flake8
+  - pydocstyle
+  # FASTQ file manipulation
+  # https://anaconda.org/bioconda/seqkit
+  # https://bioinf.shenwei.me/seqkit/
+  - seqkit
+  # FASTA files manipulation
+  - biopython
+  # PDB files manipulation
+  - biopandas
+
+
+  
