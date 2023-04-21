@@ -53,7 +53,7 @@ mamba env create -f binder/environment.yml
 Load conda environment:
 
 ```bash
-conda activate 3d-genome-builder
+conda activate 3DGB
 ```
 
 ### Download  HiC-Pro Singularity image
