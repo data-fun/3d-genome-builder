@@ -60,7 +60,7 @@ conda activate 3DGB
 
 
 ```bash
-wget --ciphers=DEFAULT:@SECLEVEL=1 https://zerkalo.curie.fr/partage/HiC-Pro/singularity_images/hicpro_3.1.0_ubuntu.img -P images
+wget --ciphers=DEFAULT:@SECLEVEL=1 https://zerkalo.curie.fr/partage/HiC-Pro/hicpro_3.1.0_ubuntu.img -P images
 ```
 
 Verify HiC-Pro version with:
