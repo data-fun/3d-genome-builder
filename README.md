@@ -63,6 +63,19 @@ conda activate 3DGB
 wget --ciphers=DEFAULT:@SECLEVEL=1 https://zerkalo.curie.fr/partage/HiC-Pro/hicpro_3.1.0_ubuntu.img -P images
 ```
 
+If this command fails, try with an [alternate download link](https://zenodo.org/record/8376626):
+
+```bash
+wget https://zenodo.org/record/8376626/files/hicpro_3.1.0_ubuntu.img -P images
+```
+
+Check the integrity of the image:
+
+```bash
+$ md5sum images/hicpro_3.1.0_ubuntu.img
+d480e636397c14e187608e50309eb9af  images/hicpro_3.1.0_ubuntu.img
+```
+
 Verify HiC-Pro version with:
 
 ```bash

@@ -17,5 +17,6 @@ def list_versions():
 
 
 if __name__ == "__main__":
+    print("-" * 40)
     list_versions()
     print("-" * 40)
