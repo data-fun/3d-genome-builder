@@ -10,6 +10,8 @@ sra_ids:
 
 hicpro_restriction_sites: "A^AGCTT"
 
+hicpro_ligation_site: "AAGCTAGCTT"
+
 hicpro_resolutions:
 - 50000
 - 30000
