@@ -11,17 +11,22 @@ sra_ids:
 - ID3
 - ID4
 
-# Choose appropriate restriction sites
+# Restriction sites
 hicpro_restriction_sites: "T^TAA"
 
-# Choose appropriate resolution
+# Ligation site
+hicpro_ligation_site: "AAGCTAGCTT"
+
+# Output resolutions for HiC-Pro
 hicpro_resolutions:
 - 20000
 - 30000
 - 40000
 - 50000
 
-# Choose appropriate resolution
+# Output resolutions for Pastis
+# should match the resolutions used in HiC-Pro.
+# Fewer resolutions can be used.
 pastis_resolutions:
 - 50000
 - 40000
