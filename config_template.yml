@@ -15,6 +15,7 @@ sra_ids:
 hicpro_restriction_sites: "T^TAA"
 
 # Ligation site
+# This parameter is optional.
 hicpro_ligation_site: "AAGCTAGCTT"
 
 # Output resolutions for HiC-Pro

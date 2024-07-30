@@ -3,8 +3,11 @@ import os
 ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
 WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
 
-# Verify the present of 'hicpro_ligation_site'
-# and set a default value if not.
+
+# The 'hicpro_ligation_site' parameter is optional.
+# According to the HiC-Pro documentation:
+# "Note that if if the LIGATION_SITE parameter in the not defined, HiC-Pro will skip the second step of mapping" 
+# Here we define a default value that will be later removed in the HiC-Pro configuration file.
 if "hicpro_ligation_site" not in config:
     config["hicpro_ligation_site"] = "no_ligation_site"
 
