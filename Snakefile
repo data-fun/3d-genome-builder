@@ -5,9 +5,11 @@ WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
 
 
 # The 'hicpro_ligation_site' parameter is optional.
+# It can contain multiple ligation motifs separated by commas.
+# (https://github.com/nservant/HiC-Pro/blob/master/doc/FAQ.md)
 # According to the HiC-Pro documentation:
-# "Note that if if the LIGATION_SITE parameter in the not defined, HiC-Pro will skip the second step of mapping" 
-# Here we define a default value that will be later removed in the HiC-Pro configuration file.
+# "Note that if if the LIGATION_SITE parameter in the not defined, HiC-Pro will skip the second step of mapping"
+# Here we define a default flag value that will be later removed in the HiC-Pro configuration file.
 if "hicpro_ligation_site" not in config:
     config["hicpro_ligation_site"] = "no_ligation_site"
 
