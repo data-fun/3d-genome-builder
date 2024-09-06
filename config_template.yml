@@ -16,6 +16,7 @@ hicpro_restriction_sites: "T^TAA"
 
 # Ligation site
 # This parameter is optional.
+# And can contain multiple ligation motifs separated by comma.
 hicpro_ligation_site: "AAGCTAGCTT"
 
 # Output resolutions for HiC-Pro
