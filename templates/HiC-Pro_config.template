@@ -65,7 +65,7 @@ REPORT_CAPTURE_REPORTER = 1
 #######################################################################
 
 GENOME_FRAGMENT = {{ genome_fragment }}
-LIGATION_SITE =
+LIGATION_SITE ={% if ligation_site != "no_ligation_site" %} {{ ligation_site }}{% endif %}
 MIN_FRAG_SIZE =
 MAX_FRAG_SIZE =
 MIN_INSERT_SIZE =

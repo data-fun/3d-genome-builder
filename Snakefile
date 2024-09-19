@@ -3,6 +3,17 @@ import os
 ORGANISM_NAME = f"{config['organism'].replace(' ', '_')}"
 WORKING_DIR = f"{config['workdir'].replace(' ', '_')}"
 
+
+# The 'hicpro_ligation_site' parameter is optional.
+# It can contain multiple ligation motifs separated by commas.
+# (https://github.com/nservant/HiC-Pro/blob/master/doc/FAQ.md)
+# According to the HiC-Pro documentation:
+# "Note that if if the LIGATION_SITE parameter in the not defined, HiC-Pro will skip the second step of mapping"
+# Here we define a default flag value that will be later removed in the HiC-Pro configuration file.
+if "hicpro_ligation_site" not in config:
+    config["hicpro_ligation_site"] = "no_ligation_site"
+
+
 workdir: WORKING_DIR
 
 #  Main rule to generate all result files.
@@ -165,6 +176,7 @@ rule build_genome_index:
 
 
 # Create HiC-Pro configuration file.
+# See https://nservant.github.io/HiC-Pro/MANUAL.html#setting-the-configuration-file
 rule create_HiC_Pro_config:
     input:
         template="../templates/HiC-Pro_config.template",
@@ -174,6 +186,7 @@ rule create_HiC_Pro_config:
         "HiC-Pro/config.txt"
     params:
         genome_index_path="HiC-Pro/bowtie2_index",
+        ligation_site=config["hicpro_ligation_site"],
         resolutions=config["hicpro_resolutions"]
     message:
         "Building HiC-Pro configuration file"
@@ -186,6 +199,7 @@ rule create_HiC_Pro_config:
         "--template {input.template} "
         "--chromosome-sizes {input.chromosome_sizes} "
         "--genome-fragment {input.genome_fragment} "
+        "--ligation-site {params.ligation_site} "
         "--genome-index-path {params.genome_index_path} "
         "--resolutions {params.resolutions} "
         "--output {output} "

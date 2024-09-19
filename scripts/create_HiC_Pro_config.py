@@ -59,6 +59,13 @@ def get_cli_arguments():
         required=True,
     )
     required.add_argument(
+        "--ligation-site",
+        action="store",
+        type=str,
+        help="Ligation site.",
+        required=True,
+    )
+    required.add_argument(
         "--genome-index-path",
         action="store",
         type=str,
@@ -102,6 +109,7 @@ if __name__ == "__main__":
                 genome_index_path=str(Path(ARGS.genome_index_path).resolve()) + "/",
                 chromosome_sizes=Path(ARGS.chromosome_sizes).resolve(),
                 genome_fragment=Path(ARGS.genome_fragment).resolve(),
+                ligation_site=ARGS.ligation_site,
                 resolutions=" ".join([str(res) for res in ARGS.resolutions])
             )
         )
