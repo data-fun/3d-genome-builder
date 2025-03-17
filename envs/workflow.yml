@@ -3,9 +3,9 @@ name: 3DGB-workflow
 # see https://bioconda.github.io/
 # conda-forge has highest priority
 channels:
-  - defaults
-  - bioconda
+  - nodefaults
   - conda-forge
+  - bioconda
 dependencies:
   - python=3.9
   - numpy=1.23.5
@@ -28,6 +28,7 @@ dependencies:
   - biopython
   # Python library to read pdb files
   - biopandas
+  - pip
   - pip:
     # Pastis
     # https://github.com/hiclib/pastis
