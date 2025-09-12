@@ -148,6 +148,10 @@ def run_pastis_nb(matrix_filename, bed_filename, output_filename, seed=0, percen
     X_[mask] = np.nan
     ###############################################################################
     np.savetxt(output_filename + ".txt", X_)
+    # Remove coordinates > 999,
+    # since it does not fit in the PDB format.
+    X_[np.where(np.abs(X_) > 999)] = np.nan
+    # Write PDF file.
     print("Results written to", output_filename)
     writePDB(X_, output_filename)
 
