@@ -72,35 +72,35 @@ def write_mmcif_from_pandas(atoms, cif_name):
     cif_name : str
         Path to the output mmCIF file.
     """
-    out = open(cif_name, "w")
-    out.write("#\nloop_\n")
-    out.write("_atom_site.group_PDB\n")
-    out.write("_atom_site.label_seq_id\n")
-    out.write("_atom_site.label_atom_id\n")
-    out.write("_atom_site.label_asym_id\n")
-    out.write("_atom_site.label_comp_id\n")
-    out.write("_atom_site.Cartn_x\n")
-    out.write("_atom_site.Cartn_y\n")
-    out.write("_atom_site.Cartn_z\n")
-    out.write("_atom_site.B_iso_or_equiv\n")
+    with open(cif_name, "w") as out:
+        out.write("#\nloop_\n")
+        out.write("_atom_site.group_PDB\n")
+        out.write("_atom_site.label_seq_id\n")
+        out.write("_atom_site.label_atom_id\n")
+        out.write("_atom_site.label_asym_id\n")
+        out.write("_atom_site.label_comp_id\n")
+        out.write("_atom_site.Cartn_x\n")
+        out.write("_atom_site.Cartn_y\n")
+        out.write("_atom_site.Cartn_z\n")
+        out.write("_atom_site.B_iso_or_equiv\n")
 
-    to_print = atoms.to_string(
-        header=False, index=False,
-        columns=[
-            "record_name",
-            "atom_number",
-            "atom_name",    
-            "chain_id",
-            "residue_name",
-            "x_coord",
-            "y_coord",
-            "z_coord",
-            "b_factor"
-        ]
-    )
+        to_print = atoms.to_string(
+            header=False,
+            index=False,
+            columns=[
+                "record_name",
+                "atom_number",
+                "atom_name",
+                "chain_id",
+                "residue_name",
+                "x_coord",
+                "y_coord",
+                "z_coord",
+                "b_factor"
+            ]
+        )
 
-    out.write(to_print)
-    out.close()
+        out.write(to_print)
 
 def map_parameter(pdb_name_in, bedgraph_name, pdb_name_out):
     """Assign a quantitative parameter to a genome 3D structure.
