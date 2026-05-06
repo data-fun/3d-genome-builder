@@ -8,7 +8,7 @@ channels:
   - bioconda
 dependencies:
   - python=3.9
-  - setpuptools < 60.0
+  - setuptools < 60.0
   - numpy=1.23.5
   - scipy
   - matplotlib
